@@ -1,6 +1,13 @@
 import React from 'react'
+import fetchStudents, { SquadType, Student } from '@/lib/shaleDb'
+import { AllTiers } from '@/lib/tiers'
+import StudentList from '@/components/Students/StudentList'
+import StudentCard from '@/components/Students/StudentCard'
 
-export default function Home() {
+export const revalidate = 600 // invalidate every 5 minutes
+
+export default async function Home() {
+  const students = await fetchStudents()
   return (
     <div className='container mx-auto px-4 py-6 dark:bg-gray-900'>
       {/* Header Section */}
@@ -79,40 +86,41 @@ export default function Home() {
 
         {/* Tier Rows */}
         <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
-          {/* SS Row */}
-          <div className='mb-4 flex items-center'>
-            <span className='w-16 text-center font-semibold text-gray-800 dark:text-gray-300'>
-              SS
-            </span>
-            {/* Striker Column */}
-            <div className='flex flex-1 space-x-2'>
-              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-            </div>
-            {/* Special Column */}
-            <div className='flex flex-1 space-x-2'>
-              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-            </div>
-          </div>
+          <div className='grid grid-cols-[150px_1fr_1fr] gap-4 p-4'>
+            {/*Header Row*/}
+            <div />
+            <div className='text-center text-lg font-bold'>Striker</div>
+            <div className='text-center text-lg font-bold'>Special</div>
 
-          {/* Repeated Rows for S, A, B, C, D, and Unranked */}
-          {['S', 'A', 'B', 'C', 'D', 'Unranked'].map((tier) => (
-            <div key={tier} className='mb-4 flex items-center'>
-              <span className='w-16 text-center font-semibold text-gray-800 dark:text-gray-300'>
-                {tier}
-              </span>
-              <div className='flex flex-1 space-x-2'>
-                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-              </div>
-              <div className='flex flex-1 space-x-2'>
-                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
-              </div>
-            </div>
-          ))}
+            {/* Repeated Rows for SS, S, A, B, C, D, and Unranked */}
+            {AllTiers.map((tier) => (
+              <React.Fragment key={tier}>
+                <div className='text-center font-semibold'>{tier}</div>
+                <div className='flex flex-wrap content-start items-start justify-start gap-2'>
+                  <StudentList
+                    students={students}
+                    tier={tier}
+                    squadType={SquadType.Main}
+                  >
+                    {(student: Student) => (
+                      <StudentCard key={student.Id} student={student} />
+                    )}
+                  </StudentList>
+                </div>
+                <div className='flex flex-wrap content-start items-start justify-start gap-2'>
+                  <StudentList
+                    students={students}
+                    tier={tier}
+                    squadType={SquadType.Support}
+                  >
+                    {(student: Student) => (
+                      <StudentCard key={student.Id} student={student} />
+                    )}
+                  </StudentList>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </div>
     </div>
