@@ -1,101 +1,120 @@
-import Image from "next/image";
+import React from 'react'
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className='container mx-auto px-4 py-6 dark:bg-gray-900'>
+      {/* Header Section */}
+      <div className='mb-8 border-b-2 border-gray-300 pb-4 dark:border-gray-700'>
+        {/* Boss Selector and Info Box */}
+        <div className='mb-4 flex justify-between'>
+          <select className='rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'>
+            <option>Select Boss</option>
+            <option>Boss 1</option>
+            <option>Boss 2</option>
+          </select>
+          <div className='flex w-1/2 items-center rounded border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-800'>
+            <div className='mr-4 h-12 w-12 bg-gray-300 dark:bg-gray-600'></div>
+            <div>
+              <strong className='text-gray-800 dark:text-gray-100'>
+                Boss Name
+              </strong>
+              <br />
+              <span className='text-sm text-gray-600 dark:text-gray-400'>
+                Short description or blurb about the boss goes here.
+              </span>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Difficulty Selector */}
+        <div className='mb-4 flex space-x-4'>
+          {['Easy', 'Medium', 'Hard', 'Very Hard'].map((difficulty) => (
+            <button
+              key={difficulty}
+              className='rounded bg-gray-200 px-4 py-2 font-semibold text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+            >
+              {difficulty}
+            </button>
+          ))}
+        </div>
+
+        {/* Color Selector */}
+        <div className='mb-4 flex space-x-4'>
+          <button className='rounded bg-red-300 px-4 py-2 font-semibold text-white hover:bg-red-400 dark:bg-red-600 dark:hover:bg-red-500'>
+            Red (Explosive)
+          </button>
+          <button className='rounded bg-yellow-300 px-4 py-2 font-semibold text-white hover:bg-yellow-400 dark:bg-yellow-600 dark:hover:bg-yellow-500'>
+            Yellow (Piercing)
+          </button>
+          <button className='rounded bg-blue-300 px-4 py-2 font-semibold text-white hover:bg-blue-400 dark:bg-blue-600 dark:hover:bg-blue-500'>
+            Blue (Mystic)
+          </button>
+        </div>
+
+        {/* Filter Box */}
+        <input
+          type='text'
+          className='w-1/2 rounded border border-gray-300 bg-white px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
+          placeholder='Filter by Student Name'
+        />
+      </div>
+
+      {/* Main Area */}
+      <div className='flex flex-col space-y-4'>
+        {/* Global Rankings Toggle */}
+        <div className='text-right'>
+          <label className='mr-4 text-gray-800 dark:text-gray-300'>
+            <input
+              type='radio'
+              name='view'
+              defaultChecked={true}
+              className='mr-2'
+            />{' '}
+            Global Rankings
+          </label>
+          <label className='text-gray-800 dark:text-gray-300'>
+            <input type='radio' name='view' className='mr-2' /> My Rankings
+          </label>
+        </div>
+
+        {/* Tier Rows */}
+        <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
+          {/* SS Row */}
+          <div className='mb-4 flex items-center'>
+            <span className='w-16 text-center font-semibold text-gray-800 dark:text-gray-300'>
+              SS
+            </span>
+            {/* Striker Column */}
+            <div className='flex flex-1 space-x-2'>
+              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+            </div>
+            {/* Special Column */}
+            <div className='flex flex-1 space-x-2'>
+              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+              <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+            </div>
+          </div>
+
+          {/* Repeated Rows for S, A, B, C, D, and Unranked */}
+          {['S', 'A', 'B', 'C', 'D', 'Unranked'].map((tier) => (
+            <div key={tier} className='mb-4 flex items-center'>
+              <span className='w-16 text-center font-semibold text-gray-800 dark:text-gray-300'>
+                {tier}
+              </span>
+              <div className='flex flex-1 space-x-2'>
+                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+              </div>
+              <div className='flex flex-1 space-x-2'>
+                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+                <div className='h-12 w-12 rounded bg-gray-300 dark:bg-gray-600'></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
-  );
+  )
 }
