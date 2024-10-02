@@ -1,6 +1,6 @@
 // A list of students with a given filter
 import React from 'react'
-import { SquadType, Student } from '@/lib/shaleDb'
+import { SquadType, Student } from '@/lib/shaleDbTypes'
 import { Tier } from '@/lib/tiers'
 
 type StudentsListProps = {

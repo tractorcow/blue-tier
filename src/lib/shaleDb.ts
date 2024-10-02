@@ -1,147 +1,63 @@
-export enum SquadType {
-  Main = 'Main',
-  Support = 'Support',
+import { ArmorType, Difficulty, RaidBase, RaidType, SchaleDBData, Student } from "@/lib/shaleDbTypes";
+
+
+const dataUrl = (type: string): string => {
+  return `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/data/en/${ type }.min.json`
 }
 
-type SkillEffect = {
-  Type: string
-  Hits?: number[]
-  Scale?: number[]
-  Frames?: Record<string, number>
-  CriticalCheck?: string
-  Stat?: string
-  Channel?: number
-  Value?: number[][]
-}
-
-type Skill = {
-  SkillType: string
-  Name?: string
-  Desc?: string
-  Parameters?: string[][]
-  Cost?: number[]
-  Duration?: number
-  Range?: number
-  Radius?: { Type: string; Radius: number }[]
-  Icon?: string
-  Effects: SkillEffect[]
-}
-
-type Gear = {
-  Released: boolean[]
-  StatType: string[]
-  StatValue: number[][]
-  Name: string
-  Desc: string
-  TierUpMaterial: number[][]
-  TierUpMaterialAmount: number[][]
-}
-
-type Weapon = {
-  Name: string
-  Desc: string
-  AdaptationType: string
-  AdaptationValue: number
-  AttackPower1: number
-  AttackPower100: number
-  MaxHP1: number
-  MaxHP100: number
-  HealPower1: number
-  HealPower100: number
-  StatLevelUpType: string
-}
-
-type Summon = {
-  Id: number
-  SourceSkill: string
-  InheritCasterStat: string[]
-  InheritCasterAmount: number[][]
-  ObstacleMaxHP1: number
-  ObstacleMaxHP100: number
-}
-
-export type Student = {
-  Id: number
-  IsReleased: boolean[]
-  DefaultOrder: number
-  PathName: string
-  DevName: string
-  Name: string
-  School: string
-  Club: string
-  StarGrade: number
-  SquadType: SquadType
-  TacticRole: string
-  Summons: Summon[]
-  Position: string
-  BulletType: string
-  ArmorType: string
-  StreetBattleAdaptation: number
-  OutdoorBattleAdaptation: number
-  IndoorBattleAdaptation: number
-  WeaponType: string
-  WeaponImg: string
-  Cover: boolean
-  Equipment: string[]
-  CollectionBG: string
-  FamilyName: string
-  PersonalName: string
-  SchoolYear: string
-  CharacterAge: string
-  Birthday: string
-  CharacterSSRNew: string
-  ProfileIntroduction: string
-  Hobby: string
-  CharacterVoice: string
-  BirthDay: string
-  Illustrator: string
-  Designer: string
-  CharHeightMetric: string
-  CharHeightImperial: string
-  StabilityPoint: number
-  AttackPower1: number
-  AttackPower100: number
-  MaxHP1: number
-  MaxHP100: number
-  DefensePower1: number
-  DefensePower100: number
-  HealPower1: number
-  HealPower100: number
-  DodgePoint: number
-  AccuracyPoint: number
-  CriticalPoint: number
-  CriticalDamageRate: number
-  AmmoCount: number
-  AmmoCost: number
-  Range: number
-  RegenCost: number
-  Skills: Skill[]
-  FavorStatType: string[]
-  FavorStatValue: number[][]
-  FavorAlts: number[]
-  MemoryLobby: number[]
-  MemoryLobbyBGM: string
-  FurnitureInteraction: number[][][]
-  FavorItemTags: string[]
-  FavorItemUniqueTags: string[]
-  IsLimited: number
-  Weapon: Weapon
-  Gear: Gear
-  SkillExMaterial: number[][]
-  SkillExMaterialAmount: number[][]
-  SkillMaterial: number[][]
-  SkillMaterialAmount: number[][]
-}
-
-const jsonUrl =
-  'https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/data/en/students.min.json'
-
-const fetchStudents = async (): Promise<Student[]> => {
+const fetchDataSource = async (type: string) => {
+  const jsonUrl = dataUrl(type)
   const response = await fetch(jsonUrl)
   if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${response.statusText}`)
+    throw new Error(`Failed to fetch data from ${ jsonUrl }: ${ response.statusText }`)
   }
-  return (await response.json()) as Student[]
+  return response.json()
 }
 
-export default fetchStudents
+
+const fetchData = async (): Promise<SchaleDBData> => {
+  const [ students, raidData ] = await Promise.all([
+    fetchDataSource('students'),
+    fetchDataSource('raids'),
+  ])
+
+  // Split up the raid data
+  const raids: RaidBase[] = []
+  for (const data of raidData['Raid']) {
+    // Kuro only has elastic
+    const armorTypes = data["ArmorType"] == ArmorType.ElasticArmor
+      ? [ ArmorType.ElasticArmor ]
+      : [ ArmorType.LightArmor, ArmorType.HeavyArmor, ArmorType.Unarmed ]
+
+    // Limit our focus to only insane and above difficulties
+    const maxDifficulty = Math.max(...data["MaxDifficulty"])
+    const difficulties = maxDifficulty >= 6
+      ? [ Difficulty.Insane, Difficulty.Torment ]
+      : [ Difficulty.Insane ]
+
+    raids.push({
+      RaidType: RaidType.Raid,
+      OptionTypes: armorTypes,
+      OptionDifficulties: difficulties,
+      ...data,
+    })
+  }
+
+  // Merge all multi floor raids into a single unit
+  const multiFloorArmors = raidData['MultiFloorRaid'].map((raid: RaidBase) => raid.ArmorType)
+  raids.push({
+    RaidType: RaidType.MultiFloorRaid,
+    OptionTypes: multiFloorArmors,
+    OptionDifficulties: [
+      Difficulty.Floor1_49,
+      Difficulty.Floor50_125
+    ],
+    ...raidData['MultiFloorRaid'][0],
+  })
+  return {
+    raids,
+    students
+  }
+}
+
+export default fetchData;
