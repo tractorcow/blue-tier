@@ -1,13 +1,14 @@
-"use client"
+'use client'
 
 import React, { useReducer } from 'react'
 import { SchaleDBData, SquadType, Student } from '@/lib/shaleDbTypes'
 import { AllTiers } from '@/lib/tiers'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
-import { FilterActionTypes, initialState, reducer } from "@/state/FilterState";
-import ArmorButton from "@/components/TierList/ArmorButton";
-import RaidCard from "@/components/Raids/RaidCard";
+import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
+import ArmorButton from '@/components/TierList/ArmorButton'
+import RaidCard from '@/components/Raids/RaidCard'
+import AuthComponent from "@/components/Auth/AuthComponent";
 
 type TierListProps = {
   data: SchaleDBData
@@ -17,20 +18,23 @@ export default function TierList({ data }: TierListProps) {
   const { raids, students } = data
 
   // Use useReducer for state management
-  const [ state, dispatch ] = useReducer(reducer, initialState);
+  const [ state, dispatch ] = useReducer(reducer, initialState)
 
   // Handlers for updating state
   const changeBoss = (payload: number) => {
-    dispatch({ type: FilterActionTypes.SET_RAID, payload: payload });
-  };
+    dispatch({ type: FilterActionTypes.SET_RAID, payload: payload })
+  }
   const changeDifficulty = (difficultyLevel: number) => {
-    dispatch({ type: FilterActionTypes.SET_DIFFICULTY, payload: difficultyLevel });
-  };
+    dispatch({
+      type: FilterActionTypes.SET_DIFFICULTY,
+      payload: difficultyLevel,
+    })
+  }
   const changeArmour = (armourIndex: number) => {
-    dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex });
-  };
+    dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex })
+  }
 
-  const selectedRaid = raids.find((raid) => raid.Id === state.raid);
+  const selectedRaid = raids.find((raid) => raid.Id === state.raid)
 
   return (
     <div className='container mx-auto px-4 py-6 dark:bg-gray-900'>
@@ -41,24 +45,26 @@ export default function TierList({ data }: TierListProps) {
           <select
             value={ state.raid }
             onChange={ (e) => changeBoss(parseInt(e.target.value)) }
-            className='rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'>
+            className='rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
+          >
             <option value={ 0 }>Select Boss</option>
             { raids.map((raid) => (
-              <option key={ raid.Id } value={ raid.Id }>{ raid.Name }</option>
+              <option key={ raid.Id } value={ raid.Id }>
+                { raid.Name }
+              </option>
             )) }
           </select>
-          { selectedRaid && (
-            <RaidCard raid={ selectedRaid } />
-          ) }
+          { selectedRaid && <RaidCard raid={ selectedRaid }/> }
         </div>
 
         {/* Difficulty Selector */ }
         { selectedRaid && (
           <div className='mb-4 flex space-x-4'>
             { selectedRaid.OptionDifficulties.map((difficulty, index) => {
-              const selectedClass = state.difficulty === index
-                ? 'bg-gray-400 hover:bg-gray-300'
-                : 'bg-gray-600 hover:bg-gray-500'
+              const selectedClass =
+                state.difficulty === index
+                  ? 'bg-gray-400 hover:bg-gray-300'
+                  : 'bg-gray-600 hover:bg-gray-500'
               return (
                 <button
                   key={ difficulty }
@@ -67,7 +73,7 @@ export default function TierList({ data }: TierListProps) {
                 >
                   { difficulty }
                 </button>
-              );
+              )
             }) }
           </div>
         ) }
@@ -83,7 +89,6 @@ export default function TierList({ data }: TierListProps) {
                 onClick={ () => changeArmour(index) }
               />
             )) }
-
           </div>
         ) }
 
@@ -152,6 +157,7 @@ export default function TierList({ data }: TierListProps) {
           </div>
         </div>
       </div>
+      <AuthComponent/>
     </div>
   )
 }

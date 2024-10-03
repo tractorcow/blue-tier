@@ -1,23 +1,25 @@
 include .env
 export
 
+# Function to load nvm and set the node version
+define NVM_SETUP
+	. $(NVM_DIR)/nvm.sh && nvm use $(NODE_VERSION)
+endef
+
 default: help
-nvm:
-	. ${NVM_DIR}/nvm.sh && nvm use && $(CMD)
 install: ## Install dependencies
-	make nvm CMD="npm install"
+	@$(NVM_SETUP) && npm install
 update: ## Update dependencies
-	make nvm CMD="npm upgrade"
+	@$(NVM_SETUP) && npm update
 watch: ## Start dev watcher
-	make nvm CMD="npm run dev"
+	@$(NVM_SETUP) && npm run dev
 lint: ## Lint all
-	make nvm CMD="npm run lint"
+	@$(NVM_SETUP) && npm run lint
 fix: ## Lint and fix safe
-	make nvm CMD="npm run fix"
+	@$(NVM_SETUP) && npm run fix
 migrate: ## Run prisma migrations
-	make nvm CMD="npx prisma migrate dev"
-	make nvm CMD="npx prisma generate"
+	@$(NVM_SETUP) && npx prisma migrate dev && npx prisma generate
 build: ## Build a production build
-	make nvm CMD="npm run build"
+	@$(NVM_SETUP) && npm run build
 help: ## Display a list of commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sed 's/makefile://g' | awk 'BEGIN {FS = ":[^:]*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

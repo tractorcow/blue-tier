@@ -8,7 +8,22 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  name  String? @db.VarChar(255)
-  email String  @unique @db.VarChar(255)
+  id       String    @id @default(cuid())
+  name     String?
+  email    String?   @unique
+  image    String?
+  accounts Account[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String // E.g. 'discord'
+  providerAccountId String // E.g. discord id
+  type              String
+  access_token      String? // Optional, for OAuth providers
+  refresh_token     String? // Optional, for OAuth providers
+  user              User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
 }

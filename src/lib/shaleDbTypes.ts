@@ -179,40 +179,40 @@ export enum RaidType {
 export interface RaidBase {
   /** Fields used by tier list */
   // Fields we inject for easier processing
-  RaidType: RaidType;
-  OptionTypes: ArmorType[]; // List of selectable armour types
-  OptionDifficulties: Difficulty[];
+  RaidType: RaidType
+  OptionTypes: ArmorType[] // List of selectable armour types
+  OptionDifficulties: Difficulty[]
   /** Fields from schaledb */
-  Id: number;
+  Id: number
   // Localised released flag (jp, global, cn)
-  IsReleased: boolean[];
+  IsReleased: boolean[]
   // Array is localised difficulty (jp, global, cn) or fixed number
   // Index is array index of AllDifficulties
-  MaxDifficulty: number[] | number;
-  PathName: string;
-  Faction: string;
-  Terrain: Terrain[];
-  ArmorType: ArmorType;
-  EnemyList: number[][];
-  RaidSkill: object[];
-  HasNormalAttack: number[];
-  BattleDuration: number[];
-  Name: string;
+  MaxDifficulty: number[] | number
+  PathName: string
+  Faction: string
+  Terrain: Terrain[]
+  ArmorType: ArmorType
+  EnemyList: number[][]
+  RaidSkill: object[]
+  HasNormalAttack: number[]
+  BattleDuration: number[]
+  Name: string
 }
 
 export interface Raid extends RaidBase {
-  GroupName: string;
-  BulletType: BulletType;
-  BulletTypeInsane?: BulletType;
-  Profile: string;
+  GroupName: string
+  BulletType: BulletType
+  BulletTypeInsane?: BulletType
+  Profile: string
 }
 
 export interface MultiFloorRaid {
-  DifficultyStartFloor: number[];
-  BulletType: BulletType[];
+  DifficultyStartFloor: number[]
+  BulletType: BulletType[]
 }
 
 export interface SchaleDBData {
-  raids: RaidBase[],
+  raids: RaidBase[]
   students: Student[]
 }
