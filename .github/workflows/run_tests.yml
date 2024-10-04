@@ -1,0 +1,40 @@
+name: Tests
+on:
+  push:
+    branches:
+      - '!master'
+  pull_request:
+    branches:
+      - '**'
+permissions:
+  checks: write
+  contents: write
+jobs:
+  commit-lint:
+    name: Lint commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Commit linting
+        uses: wagoid/commitlint-github-action@v5
+  code-lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Node.js dependencies
+        run: npm ci
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          eslint_extensions: 'js,jsx,ts,tsx'
+          prettier: true
