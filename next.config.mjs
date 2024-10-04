@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    images: {
-        domains: ['cdn.jsdelivr.net'],
-    }
-};
+  images: {
+    domains: ['cdn.jsdelivr.net'],
+  },
+}
 
-export default nextConfig;
+export default nextConfig

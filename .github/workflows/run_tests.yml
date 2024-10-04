@@ -6,12 +6,13 @@ on:
   pull_request:
     branches:
       - '**'
+permissions:
+  checks: write
+  contents: write
 jobs:
   commit-lint:
     name: Lint commit
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4
@@ -25,8 +26,15 @@ jobs:
     steps:
       - name: Check out git repository
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Node.js dependencies
+        run: npm ci
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
+          eslint_extensions: 'js,jsx,ts,tsx'
           prettier: true

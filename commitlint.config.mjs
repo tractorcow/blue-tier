@@ -1,4 +1,4 @@
 const Configuration = {
-    extends: ['@commitlint/config-conventional']
+  extends: ['@commitlint/config-conventional'],
 }
-export default Configuration;
+export default Configuration
