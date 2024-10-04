@@ -1,0 +1,32 @@
+name: Tests
+on:
+  push:
+    branches:
+      - '!master'
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  commit-lint:
+    name: Lint commit
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Commit linting
+        uses: wagoid/commitlint-github-action@v5
+  code-lint:
+    name: Lint code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+      - name: Run linters
+        uses: wearerequired/lint-action@v2
+        with:
+          eslint: true
+          prettier: true
