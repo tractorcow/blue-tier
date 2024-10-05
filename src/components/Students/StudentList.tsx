@@ -5,7 +5,7 @@ import { Tier } from '@/lib/tiers'
 
 type StudentsListProps = {
   students: Student[]
-  children: (students: Student) => React.JSX.Element
+  children: (students: Student, index: number) => React.JSX.Element
   tier?: Tier
   squadType?: SquadType
 }
@@ -41,7 +41,7 @@ const StudentsList = ({
     <>
       {students
         .filter((student) => match(student, tier, squadType))
-        .map((student) => children(student))}
+        .map((student, index) => children(student, index))}
     </>
   )
 }

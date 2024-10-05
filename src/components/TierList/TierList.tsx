@@ -1,7 +1,15 @@
 'use client'
 
 import React, { useReducer } from 'react'
-import { SchaleDBData, SquadType, Student } from '@/lib/shaleDbTypes'
+import {
+  DragDropContext,
+  Draggable,
+  DraggingStyle,
+  Droppable,
+  DropResult,
+  NotDraggingStyle,
+} from 'react-beautiful-dnd'
+import { SchaleDBData, Student } from '@/lib/shaleDbTypes'
 import { AllTiers, SquadTypes } from '@/lib/tiers'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
@@ -32,6 +40,34 @@ export default function TierList({ data }: TierListProps) {
   }
   const changeArmour = (armourIndex: number) => {
     dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex })
+  }
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) {
+      return
+    }
+
+    // You can update your state here to reflect the new tier placement
+    // For example, move the student between lists
+  }
+
+  const getItemStyle = (
+    isDragging: boolean,
+    draggableStyle: DraggingStyle | NotDraggingStyle | undefined
+  ) => {
+    console.log(isDragging, draggableStyle)
+    return {
+      // // some basic styles to make the items look a bit nicer
+      // userSelect: 'none',
+      // padding: grid * 2,
+      // margin: `0 0 ${grid}px 0`,
+      //
+      // // change background colour if dragging
+      // background: isDragging ? 'lightgreen' : 'grey',
+
+      // styles we need to apply on draggables
+      ...draggableStyle,
+    }
   }
 
   const selectedRaid = raids.find((raid) => raid.Id === state.raid)
@@ -133,27 +169,56 @@ export default function TierList({ data }: TierListProps) {
             ))}
 
             {/* Repeated Rows for SS, S, A, B, C, D, and Unranked */}
-            {AllTiers.map((tier) => (
-              <React.Fragment key={tier}>
-                <div className='text-center font-semibold'>{tier}</div>
-                {SquadTypes.map((category) => (
-                  <div
-                    key={category.title}
-                    className='flex flex-wrap content-start items-start justify-start gap-2'
-                  >
-                    <StudentList
-                      students={students}
-                      tier={tier}
-                      squadType={category.squadType}
+            <DragDropContext onDragEnd={handleDragEnd}>
+              {AllTiers.map((tier) => (
+                <React.Fragment key={tier}>
+                  <div className='text-center font-semibold'>{tier}</div>
+                  {SquadTypes.map((category) => (
+                    <Droppable
+                      key={category.squadType}
+                      droppableId={`${tier}-${category.squadType}`}
                     >
-                      {(student: Student) => (
-                        <StudentCard key={student.Id} student={student} />
+                      {(provided) => (
+                        <div
+                          className='flex flex-wrap content-start items-start justify-start gap-2'
+                          ref={provided.innerRef}
+                          {...provided.droppableProps}
+                        >
+                          <StudentList
+                            students={students}
+                            tier={tier}
+                            squadType={category.squadType}
+                          >
+                            {(student: Student, index: number) => (
+                              <Draggable
+                                key={student.Id}
+                                draggableId={student.Id.toString()}
+                                index={index}
+                              >
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    style={getItemStyle(
+                                      snapshot.isDragging,
+                                      provided.draggableProps.style
+                                    )}
+                                  >
+                                    <StudentCard student={student} />
+                                  </div>
+                                )}
+                              </Draggable>
+                            )}
+                          </StudentList>
+                          {provided.placeholder}
+                        </div>
                       )}
-                    </StudentList>
-                  </div>
-                ))}
-              </React.Fragment>
-            ))}
+                    </Droppable>
+                  ))}
+                </React.Fragment>
+              ))}
+            </DragDropContext>
           </div>
         </div>
       </div>
