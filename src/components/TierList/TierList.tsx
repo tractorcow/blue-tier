@@ -4,10 +4,8 @@ import React, { useReducer } from 'react'
 import {
   DragDropContext,
   Draggable,
-  DraggingStyle,
   Droppable,
   DropResult,
-  NotDraggingStyle,
 } from '@hello-pangea/dnd'
 import { SchaleDBData, Student } from '@/lib/shaleDbTypes'
 import { AllTiers, SquadTypes } from '@/lib/tiers'

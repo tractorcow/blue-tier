@@ -45,6 +45,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  Ranking       Ranking[]
 
   @@map("users")
 }
@@ -56,4 +57,54 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Ranking {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Category fields
+  raidId     String     @map("raid_id")
+  armorType  ArmorType  @map("armor_type")
+  difficulty Difficulty
+
+  // Ranking fields
+  studentId String @map("student_id")
+  tier      Tier
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String @map("user_id")
+
+  // Users can only vote for each student once per category
+  @@unique([raidId, armorType, difficulty, studentId, userId])
+  @@map("rankings")
+}
+
+enum Tier {
+  SS
+  S
+  A
+  B
+  C
+  D
+}
+
+enum Difficulty {
+  Normal
+  Hard
+  VeryHard
+  Hardcore
+  Extreme
+  Insane
+  Torment
+  Floor1_49
+  Floor50_125
+}
+
+enum ArmorType {
+  Normal
+  LightArmor
+  HeavyArmor
+  Unarmed
+  ElasticArmor
 }
