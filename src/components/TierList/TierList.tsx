@@ -51,25 +51,6 @@ export default function TierList({ data }: TierListProps) {
     // For example, move the student between lists
   }
 
-  const getItemStyle = (
-    isDragging: boolean,
-    draggableStyle: DraggingStyle | NotDraggingStyle | undefined
-  ) => {
-    console.log(isDragging, draggableStyle)
-    return {
-      // // some basic styles to make the items look a bit nicer
-      // userSelect: 'none',
-      // padding: grid * 2,
-      // margin: `0 0 ${grid}px 0`,
-      //
-      // // change background colour if dragging
-      // background: isDragging ? 'lightgreen' : 'grey',
-
-      // styles we need to apply on draggables
-      ...draggableStyle,
-    }
-  }
-
   const selectedRaid = raids.find((raid) => raid.Id === state.raid)
 
   return (
@@ -195,15 +176,11 @@ export default function TierList({ data }: TierListProps) {
                                 draggableId={student.Id.toString()}
                                 index={index}
                               >
-                                {(provided, snapshot) => (
+                                {(provided) => (
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    style={getItemStyle(
-                                      snapshot.isDragging,
-                                      provided.draggableProps.style
-                                    )}
                                   >
                                     <StudentCard student={student} />
                                   </div>
