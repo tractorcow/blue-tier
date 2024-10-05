@@ -4,6 +4,8 @@ import React, { useEffect, useReducer, useState } from 'react'
 import {
   DragDropContext,
   Draggable,
+  DraggableStateSnapshot,
+  DraggableStyle,
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd'
@@ -26,6 +28,24 @@ type TierListProps = {
 enum RankingType {
   Global = 'Global',
   User = 'User',
+}
+
+const getStyle = (
+  style: DraggableStyle | undefined,
+  snapshot: DraggableStateSnapshot
+) => {
+  if (!snapshot.isDragging) {
+    return {}
+  }
+  if (!snapshot.isDropAnimating) {
+    return style
+  }
+
+  return {
+    ...style,
+    // cannot be 0, but make it super tiny
+    transitionDuration: `0.001s`,
+  }
 }
 
 export default function TierList({
@@ -324,11 +344,15 @@ export default function TierList({
                                   rankingType === RankingType.Global
                                 }
                               >
-                                {(provided) => (
+                                {(provided, snapshot) => (
                                   <div
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
+                                    style={getStyle(
+                                      provided.draggableProps.style,
+                                      snapshot
+                                    )}
                                   >
                                     <StudentCard student={student} />
                                   </div>
