@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useReducer } from 'react'
+import React, { useEffect, useReducer, useState } from 'react'
 import {
   DragDropContext,
   Draggable,
@@ -8,7 +8,7 @@ import {
   DropResult,
 } from '@hello-pangea/dnd'
 import { SchaleDBData, Student } from '@/lib/shaleDbTypes'
-import { AllTiers, SquadTypes } from '@/lib/tiers'
+import { AllTiers, SquadTypes, Tier } from '@/lib/tiers'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
@@ -16,30 +16,132 @@ import ArmorButton from '@/components/TierList/ArmorButton'
 import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
 import { Ranking } from '@/lib/rankings'
+import { useSession } from 'next-auth/react'
 
 type TierListProps = {
-  data: SchaleDBData
-  rankings: Ranking[]
+  schaleData: SchaleDBData
+  globalRankings: Ranking[]
 }
 
-export default function TierList({ data, rankings }: TierListProps) {
-  const { raids, students } = data
+enum RankingType {
+  Global = 'Global',
+  User = 'User',
+}
+
+export default function TierList({
+  schaleData,
+  globalRankings,
+}: TierListProps) {
+  const { raids, students } = schaleData
+  const { data: session } = useSession()
 
   // Use useReducer for state management
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    raid: raids[0]?.Id,
+  })
 
-  // Handlers for updating state
+  // Get details of the current raid, armour, difficulty
+  const selectedRaid = raids.find((raid) => raid.Id === state.raid)
+  const selectedArmor = selectedRaid?.OptionTypes[state.armor]
+  const selectedDifficulty = selectedRaid?.OptionDifficulties[state.difficulty]
+
+  // Toggle between Global and User Rankings
+  const [rankingType, setRankingType] = useState<RankingType>(
+    RankingType.Global
+  )
+
+  // Local storage for user rankings
+  const [userRankings, setUserRankings] = useState<Ranking[] | undefined>(
+    undefined
+  )
+  const [loading, setLoading] = useState<boolean>(false)
+  const [loadingError, setError] = useState<string | undefined>(undefined)
+  const resolveError = (err: unknown) => {
+    console.error(err)
+    if (err instanceof Error) {
+      setError(err.message || 'An unexpected error occurred')
+    } else {
+      setError('An unexpected error occurred')
+    }
+  }
+
+  useEffect(() => {
+    const fetchUserRankings = async () => {
+      if (
+        rankingType === RankingType.User &&
+        session &&
+        !loadingError &&
+        userRankings === undefined
+      ) {
+        try {
+          setLoading(true)
+          setError(undefined) // Reset error state
+
+          // Fetch details from /api/rankings/[userId]
+          const response = await fetch(`/api/rankings/${session.user.id}`)
+          if (!response.ok) {
+            resolveError(`Failed to load rankings: ${response.statusText}`)
+            return
+          }
+
+          const data: Ranking[] = await response.json()
+          setUserRankings(data)
+        } catch (err: unknown) {
+          resolveError(err)
+        } finally {
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchUserRankings()
+  }, [rankingType, session, loadingError, userRankings])
+
+  // Selecting another boss
   const changeBoss = (payload: number) => {
     dispatch({ type: FilterActionTypes.SET_RAID, payload: payload })
   }
+
+  // When the user changes difficulty
   const changeDifficulty = (difficultyLevel: number) => {
     dispatch({
       type: FilterActionTypes.SET_DIFFICULTY,
       payload: difficultyLevel,
     })
   }
+
+  // Change defence type
   const changeArmour = (armourIndex: number) => {
     dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex })
+  }
+
+  const updateRanking = (newRanking: Ranking) => {
+    setUserRankings((prevRankings) => {
+      if (!prevRankings) {
+        // If the state is initially undefined, create a new array with the new ranking
+        return [newRanking]
+      }
+
+      // Check if an existing ranking has the same unique fields (other than tier)
+      const existingIndex = prevRankings.findIndex(
+        (r) =>
+          r.raidId === newRanking.raidId &&
+          r.armorType === newRanking.armorType &&
+          r.difficulty === newRanking.difficulty &&
+          r.studentId === newRanking.studentId
+      )
+
+      if (existingIndex !== -1) {
+        // Replace the existing ranking with the new one
+        const updatedRankings = [...prevRankings]
+        updatedRankings[existingIndex] = newRanking
+        return updatedRankings
+      } else {
+        // Add new ranking to the array
+        return [...prevRankings, newRanking]
+      }
+    })
   }
 
   const handleDragEnd = (result: DropResult) => {
@@ -47,20 +149,45 @@ export default function TierList({ data, rankings }: TierListProps) {
       return
     }
 
-    // You can update your state here to reflect the new tier placement
-    // For example, move the student between lists
+    // Get the tier from the droppableId, e.g. "SS-Main" -> "SS"
+    const tier = result.destination.droppableId.split('-')?.[0] as Tier
+    const studentId = parseInt(result.draggableId)
+
+    // Validate we have all the details for this ranking
+    if (
+      !tier ||
+      !selectedRaid ||
+      !selectedArmor ||
+      !selectedDifficulty ||
+      !studentId
+    ) {
+      resolveError('Please select a raid, armour, and difficulty first')
+      return
+    }
+
+    // Generate a new ranking
+    updateRanking({
+      raidId: selectedRaid.Id,
+      armorType: selectedArmor,
+      difficulty: selectedDifficulty,
+      studentId: studentId,
+      tier: tier,
+    })
   }
 
-  // Current rankings
-  // @TODO: Actually sort students based on rankings
-  console.log(rankings)
-
-  // @TODO: Add useEffect to query my own rankings (using /api/rankings/[userId])
-
-  const selectedRaid = raids.find((raid) => raid.Id === state.raid)
+  // Get rankings for the current state
+  const sourceRankings =
+    rankingType === RankingType.Global ? globalRankings : userRankings || []
+  const rankings = sourceRankings.filter(
+    (ranking) =>
+      ranking.raidId === selectedRaid?.Id &&
+      ranking.armorType === selectedArmor &&
+      ranking.difficulty === selectedDifficulty
+  )
 
   return (
     <div className='container mx-auto px-4 py-6 dark:bg-gray-900'>
+      <AuthComponent />
       {/* Header Section */}
       <div className='mb-8 border-b-2 border-gray-300 pb-4 dark:border-gray-700'>
         {/* Boss Selector and Info Box */}
@@ -70,7 +197,7 @@ export default function TierList({ data, rankings }: TierListProps) {
             onChange={(e) => changeBoss(parseInt(e.target.value))}
             className='rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
           >
-            <option value={0}>Select Boss</option>
+            <option value={0}>Select Raid</option>
             {raids.map((raid) => (
               <option key={raid.Id} value={raid.Id}>
                 {raid.Name}
@@ -131,15 +258,26 @@ export default function TierList({ data, rankings }: TierListProps) {
             <input
               type='radio'
               name='view'
-              defaultChecked={true}
+              checked={rankingType === RankingType.Global}
+              onChange={() => setRankingType(RankingType.Global)}
               className='mr-2'
             />{' '}
             Global Rankings
           </label>
           <label className='text-gray-800 dark:text-gray-300'>
-            <input type='radio' name='view' className='mr-2' /> My Rankings
+            <input
+              type='radio'
+              name='view'
+              className='mr-2'
+              checked={rankingType == RankingType.User}
+              onChange={() => setRankingType(RankingType.User)}
+              disabled={!session}
+            />{' '}
+            {session ? 'My Rankings' : 'Login to Rank'}
           </label>
         </div>
+
+        {loading && <div>Loading your rankings...</div>}
 
         {/* Tier Rows */}
         <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
@@ -173,6 +311,7 @@ export default function TierList({ data, rankings }: TierListProps) {
                         >
                           <StudentList
                             students={students}
+                            rankings={rankings}
                             tier={tier}
                             squadType={category.squadType}
                           >
@@ -181,6 +320,9 @@ export default function TierList({ data, rankings }: TierListProps) {
                                 key={student.Id}
                                 draggableId={student.Id.toString()}
                                 index={index}
+                                isDragDisabled={
+                                  rankingType === RankingType.Global
+                                }
                               >
                                 {(provided) => (
                                   <div
@@ -205,7 +347,6 @@ export default function TierList({ data, rankings }: TierListProps) {
           </div>
         </div>
       </div>
-      <AuthComponent />
     </div>
   )
 }

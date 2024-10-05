@@ -8,7 +8,7 @@ export const revalidate = 600 // invalidate every 5 minutes
 const Home = async () => {
   const data = await fetchData()
   const rankings = await fetchGlobalRankings()
-  return <TierList data={data} rankings={rankings} />
+  return <TierList schaleData={data} globalRankings={rankings} />
 }
 
 export default Home

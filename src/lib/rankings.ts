@@ -3,10 +3,10 @@ import { ArmorType, Difficulty } from '@/lib/shaleDbTypes'
 import { Tier } from '@/lib/tiers' // Adjust the path based on your setup
 
 export type Ranking = {
-  raidId: string
+  raidId: number
   armorType: ArmorType
   difficulty: Difficulty
-  studentId: string
+  studentId: number
   tier: Tier
 }
 
@@ -36,4 +36,18 @@ export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
     FROM "rankings"
     WHERE "user_id" = ${userId}
   `
+}
+
+export const filterRankings = (
+  rankings: Ranking[],
+  raid: string,
+  armor: ArmorType,
+  difficulty: Difficulty
+) => {
+  return rankings.filter(
+    (ranking) =>
+      ranking.raidId === raid &&
+      ranking.armorType === armor &&
+      ranking.difficulty === difficulty
+  )
 }

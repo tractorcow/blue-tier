@@ -65,12 +65,12 @@ model Ranking {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Category fields
-  raidId     String     @map("raid_id")
+  raidId     Int        @map("raid_id")
   armorType  ArmorType  @map("armor_type")
   difficulty Difficulty
 
   // Ranking fields
-  studentId String @map("student_id")
+  studentId Int    @map("student_id")
   tier      Tier
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String @map("user_id")
