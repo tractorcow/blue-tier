@@ -17,6 +17,7 @@ import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
 import ArmorButton from '@/components/TierList/ArmorButton'
 import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
+import { StrictModeDroppable } from '@/components/TierList/StrictModeDroppable'
 
 type TierListProps = {
   data: SchaleDBData
@@ -174,7 +175,7 @@ export default function TierList({ data }: TierListProps) {
                 <React.Fragment key={tier}>
                   <div className='text-center font-semibold'>{tier}</div>
                   {SquadTypes.map((category) => (
-                    <Droppable
+                    <StrictModeDroppable
                       key={category.squadType}
                       droppableId={`${tier}-${category.squadType}`}
                     >
@@ -214,7 +215,7 @@ export default function TierList({ data }: TierListProps) {
                           {provided.placeholder}
                         </div>
                       )}
-                    </Droppable>
+                    </StrictModeDroppable>
                   ))}
                 </React.Fragment>
               ))}
