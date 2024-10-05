@@ -14,13 +14,13 @@ export type Ranking = {
 export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
   return prisma.$queryRaw<Ranking[]>`
     SELECT
-      "raidId",
-      "armorType",
+      "raid_id" AS "raidId",
+      "armor_type" AS "armorType",
       "difficulty",
-      "studentId",
+      "student_id" AS "studentId",
       MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
     FROM "rankings"
-    GROUP BY "raidId", "armorType", "difficulty", "studentId"
+    GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
   `
 }
 
@@ -28,12 +28,12 @@ export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
 export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
   return prisma.$queryRaw<Ranking[]>`
     SELECT
-      "raidId",
-      "armorType",
+      "raid_id" AS "raidId",
+      "armor_type" AS "armorType",
       "difficulty",
-      "studentId",
+      "student_id" AS "studentId",
       "tier"
     FROM "rankings"
-    WHERE "userId" = ${userId}
+    WHERE "user_id" = ${userId}
   `
 }

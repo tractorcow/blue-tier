@@ -15,12 +15,14 @@ import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
 import ArmorButton from '@/components/TierList/ArmorButton'
 import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
+import { Ranking } from '@/lib/rankings'
 
 type TierListProps = {
   data: SchaleDBData
+  rankings: Ranking[]
 }
 
-export default function TierList({ data }: TierListProps) {
+export default function TierList({ data, rankings }: TierListProps) {
   const { raids, students } = data
 
   // Use useReducer for state management
@@ -48,6 +50,12 @@ export default function TierList({ data }: TierListProps) {
     // You can update your state here to reflect the new tier placement
     // For example, move the student between lists
   }
+
+  // Current rankings
+  // @TODO: Actually sort students based on rankings
+  console.log(rankings)
+
+  // @TODO: Add useEffect to query my own rankings (using /api/rankings/[userId])
 
   const selectedRaid = raids.find((raid) => raid.Id === state.raid)
 
