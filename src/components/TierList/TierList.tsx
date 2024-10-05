@@ -2,7 +2,7 @@
 
 import React, { useReducer } from 'react'
 import { SchaleDBData, SquadType, Student } from '@/lib/shaleDbTypes'
-import { AllTiers } from '@/lib/tiers'
+import { AllTiers, SquadTypes } from '@/lib/tiers'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
@@ -123,35 +123,35 @@ export default function TierList({ data }: TierListProps) {
           <div className='grid grid-cols-[150px_1fr_1fr] gap-4 p-4'>
             {/*Header Row*/}
             <div />
-            <div className='text-center text-lg font-bold'>Striker</div>
-            <div className='text-center text-lg font-bold'>Special</div>
+            {SquadTypes.map((category) => (
+              <div
+                key={category.title}
+                className='text-center text-lg font-bold'
+              >
+                {category.title}
+              </div>
+            ))}
 
             {/* Repeated Rows for SS, S, A, B, C, D, and Unranked */}
             {AllTiers.map((tier) => (
               <React.Fragment key={tier}>
                 <div className='text-center font-semibold'>{tier}</div>
-                <div className='flex flex-wrap content-start items-start justify-start gap-2'>
-                  <StudentList
-                    students={students}
-                    tier={tier}
-                    squadType={SquadType.Main}
+                {SquadTypes.map((category) => (
+                  <div
+                    key={category.title}
+                    className='flex flex-wrap content-start items-start justify-start gap-2'
                   >
-                    {(student: Student) => (
-                      <StudentCard key={student.Id} student={student} />
-                    )}
-                  </StudentList>
-                </div>
-                <div className='flex flex-wrap content-start items-start justify-start gap-2'>
-                  <StudentList
-                    students={students}
-                    tier={tier}
-                    squadType={SquadType.Support}
-                  >
-                    {(student: Student) => (
-                      <StudentCard key={student.Id} student={student} />
-                    )}
-                  </StudentList>
-                </div>
+                    <StudentList
+                      students={students}
+                      tier={tier}
+                      squadType={category.squadType}
+                    >
+                      {(student: Student) => (
+                        <StudentCard key={student.Id} student={student} />
+                      )}
+                    </StudentList>
+                  </div>
+                ))}
               </React.Fragment>
             ))}
           </div>

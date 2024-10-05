@@ -1,3 +1,5 @@
+import { SquadType } from '@/lib/shaleDbTypes'
+
 export enum Tier {
   SS = 'SS',
   S = 'S',
@@ -16,4 +18,15 @@ export const AllTiers: Tier[] = [
   Tier.C,
   Tier.D,
   Tier.Unranked,
+]
+
+export const SquadTypes = [
+  {
+    title: 'Striker',
+    squadType: SquadType.Main,
+  },
+  {
+    title: 'Special',
+    squadType: SquadType.Support,
+  },
 ]
