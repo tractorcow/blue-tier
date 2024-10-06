@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { fetchDataForUser } from '@/lib/rankings'
+import { fetchDataForUser } from '@/lib/ranking'
 
 export async function GET(
   request: NextRequest,
