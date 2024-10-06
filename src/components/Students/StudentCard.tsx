@@ -1,5 +1,5 @@
 import React from 'react'
-import type { Student } from '@/lib/shaleDbTypes'
+import type { Student } from '@/lib/shaledb/types'
 import Image from 'next/image'
 
 export interface StudentCardProps {

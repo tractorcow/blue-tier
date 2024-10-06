@@ -1,4 +1,4 @@
-import { RankingType } from '@/lib/rankings'
+import { RankingType } from '@/lib/ranking/types'
 
 export type FilterState = {
   raid: number

@@ -1,47 +1,17 @@
 // A list of students with a given filter
 import React from 'react'
-import { SquadType, Student } from '@/lib/shaleDbTypes'
-import { Tier } from '@/lib/tiers'
-import { Ranking } from '@/lib/rankings'
+import { SquadType, Student } from '@/lib/shaledb/types'
+import { AllTier } from '@/lib/ranking/types'
 
 type StudentsListProps = {
   students: Student[]
-  rankings: Ranking[]
   children: (students: Student, index: number) => React.JSX.Element
-  tier?: Tier
+  tier?: AllTier
   squadType?: SquadType
-}
-
-/**
- * Match a student with a given filter
- * @param student
- * @param tier
- * @param squadType
- * @param rankings
- */
-const match = (
-  student: Student,
-  tier: Tier,
-  squadType: SquadType,
-  rankings: Ranking[]
-): boolean => {
-  // Exclude students that are not in the squad type
-  if (student.SquadType !== squadType) {
-    return false
-  }
-
-  // Check if the student is ranked in the given tier
-  const rankedStudent = rankings.find(
-    (ranking) => ranking.studentId === student.Id
-  )
-
-  // Return the student if they are ranked or the tier is unranked
-  return rankedStudent ? rankedStudent.tier === tier : tier === Tier.Unranked
 }
 
 const StudentsList = ({
   students,
-  rankings,
   children,
   tier,
   squadType,
@@ -53,7 +23,7 @@ const StudentsList = ({
   return (
     <>
       {students
-        .filter((student) => match(student, tier, squadType, rankings))
+        .filter((student) => student.SquadType === squadType)
         .map((student, index) => children(student, index))}
     </>
   )

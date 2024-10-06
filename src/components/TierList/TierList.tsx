@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useReducer, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import {
   DragDropContext,
   Draggable,
@@ -9,17 +10,24 @@ import {
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd'
-import { SchaleDBData, Student } from '@/lib/shaleDbTypes'
-import { AllTiers, SquadTypes, Tier } from '@/lib/tiers'
+import { Ranking } from '@prisma/client'
+import { SchaleDBData, Student } from '@/lib/shaledb/types'
+import { AllTiers, SquadTypes } from '@/lib/ranking/lists'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
 import ArmorButton from '@/components/TierList/ArmorButton'
 import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
-import { AllType, Ranking, RankingType } from '@/lib/rankings'
-import { useSession } from 'next-auth/react'
+import {
+  AllArmorType,
+  AllDifficulty,
+  AllType,
+  RankingType,
+} from '@/lib/ranking/types'
 import DifficultyButton from '@/components/TierList/DifficultyButton'
+import { AllTier } from '@/lib/ranking/types'
+import { calculateRankings } from '@/lib/ranking'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -84,6 +92,8 @@ export default function TierList({
     undefined
   )
   const [loading, setLoading] = useState<boolean>(false)
+
+  // Helper for setting errors
   const [loadingError, setError] = useState<string | undefined>(undefined)
   const resolveError = (err: unknown) => {
     console.error(err)
@@ -94,6 +104,7 @@ export default function TierList({
     }
   }
 
+  // Bootstrap user rankings when the user has logged in, and selects the User ranking type
   useEffect(() => {
     const fetchUserRankings = async () => {
       if (
@@ -131,17 +142,23 @@ export default function TierList({
     dispatch({ type: FilterActionTypes.SET_RAID, payload: payload })
   }
 
-  // When the user changes difficulty
-  const changeDifficulty = (difficultyLevel: number) => {
+  // Change the difficulty level
+  const changeDifficulty = (difficultyLevel: AllDifficulty) => {
+    const payload =
+      difficultyLevel === AllType.All
+        ? -1
+        : optionDifficulties.indexOf(difficultyLevel)
     dispatch({
       type: FilterActionTypes.SET_DIFFICULTY,
-      payload: difficultyLevel,
+      payload,
     })
   }
 
   // Change defence type
-  const changeArmour = (armourIndex: number) => {
-    dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex })
+  const changeArmour = (armourIndex: AllArmorType) => {
+    const payload =
+      armourIndex === AllType.All ? -1 : optionArmors.indexOf(armourIndex)
+    dispatch({ type: FilterActionTypes.SET_ARMOR, payload })
   }
 
   // Change ranking type
@@ -183,7 +200,7 @@ export default function TierList({
     }
 
     // Get the tier from the droppableId, e.g. "SS-Main" -> "SS"
-    const tier = result.destination.droppableId.split('-')?.[0] as Tier
+    const tier = result.destination.droppableId.split('-')?.[0] as AllTier
     const studentId = parseInt(result.draggableId)
 
     // Validate we have all the details for this ranking
@@ -211,11 +228,13 @@ export default function TierList({
   // Get rankings for the current state
   const sourceRankings =
     rankingType === RankingType.Global ? globalRankings : userRankings || []
-  const rankings = sourceRankings.filter(
-    (ranking) =>
-      ranking.raidId === selectedRaid?.Id &&
-      ranking.armorType === selectedArmor &&
-      ranking.difficulty === selectedDifficulty
+
+  const rankings = calculateRankings(
+    students,
+    sourceRankings,
+    selectedRaid,
+    selectedDifficulty,
+    selectedArmor
   )
 
   return (
@@ -243,15 +262,13 @@ export default function TierList({
         {/* Difficulty Selector */}
         {optionDifficulties && (
           <div className='mb-4 flex space-x-4'>
-            {optionDifficulties.map((difficulty, index) => {
-              // Treat All as -1
-              const value = difficulty === AllType.All ? -1 : index
+            {optionDifficulties.map((difficulty) => {
               return (
                 <DifficultyButton
                   key={difficulty}
                   difficulty={difficulty}
-                  selected={state.difficulty == value}
-                  onClick={() => changeDifficulty(value)}
+                  selected={selectedDifficulty === difficulty}
+                  onClick={() => changeDifficulty(difficulty)}
                 />
               )
             })}
@@ -261,15 +278,13 @@ export default function TierList({
         {/* Color Selector */}
         {optionArmors && (
           <div className='mb-4 flex space-x-4'>
-            {optionArmors.map((armor, index) => {
-              // Treat All as -1
-              const value = armor === AllType.All ? -1 : index
+            {optionArmors.map((armor) => {
               return (
                 <ArmorButton
                   key={armor}
                   armor={armor}
-                  selected={state.armor === value}
-                  onClick={() => changeArmour(value)}
+                  selected={selectedArmor === armor}
+                  onClick={() => changeArmour(armor)}
                 />
               )
             })}
@@ -344,8 +359,7 @@ export default function TierList({
                           {...provided.droppableProps}
                         >
                           <StudentList
-                            students={students}
-                            rankings={rankings}
+                            students={rankings[tier]}
                             tier={tier}
                             squadType={category.squadType}
                           >

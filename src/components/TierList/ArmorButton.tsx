@@ -1,6 +1,6 @@
 import React from 'react'
-import { AllArmorType, AllType } from '@/lib/rankings'
 import { ArmorType } from '@prisma/client'
+import { AllArmorType, AllType } from '@/lib/ranking/types'
 
 const ArmorClasses = {
   [ArmorType.Normal]: {

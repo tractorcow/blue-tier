@@ -1,5 +1,5 @@
 import React from 'react'
-import { AllDifficulty } from '@/lib/rankings'
+import { AllDifficulty } from '@/lib/ranking/types'
 
 type DifficultyButtonProps = {
   difficulty: AllDifficulty

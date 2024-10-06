@@ -1,4 +1,4 @@
-import { RaidBase, RaidType, SchaleDBData, Student } from '@/lib/shaleDbTypes'
+import { RaidBase, RaidType, SchaleDBData, Student } from '@/lib/shaledb/types'
 import { ArmorType, Difficulty } from '@prisma/client'
 
 const dataUrl = (type: string): string => {

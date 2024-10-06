@@ -1,24 +1,15 @@
-import { SquadType } from '@/lib/shaleDbTypes'
-import { ArmorType, Difficulty } from '@prisma/client'
+import { ArmorType, Difficulty, Tier } from '@prisma/client'
+import { AllTier, UnrankedType } from '@/lib/ranking/types'
+import { SquadType } from '@/lib/shaledb/types'
 
-export enum Tier {
-  SS = 'SS',
-  S = 'S',
-  A = 'A',
-  B = 'B',
-  C = 'C',
-  D = 'D',
-  Unranked = 'Unranked',
-}
-
-export const AllTiers: Tier[] = [
+export const AllTiers: AllTier[] = [
   Tier.SS,
   Tier.S,
   Tier.A,
   Tier.B,
   Tier.C,
   Tier.D,
-  Tier.Unranked,
+  UnrankedType.Unranked,
 ]
 
 export const SquadTypes = [

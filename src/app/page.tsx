@@ -1,7 +1,7 @@
 import React from 'react'
-import fetchData from '@/lib/shaleDb'
+import fetchData from '@/lib/shaledb/index'
 import TierList from '@/components/TierList/TierList'
-import { fetchGlobalRankings } from '@/lib/rankings'
+import { fetchGlobalRankings } from '@/lib/ranking/index'
 
 export const revalidate = 600 // invalidate every 5 minutes
 
