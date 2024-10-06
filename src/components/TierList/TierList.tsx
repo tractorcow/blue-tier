@@ -17,17 +17,13 @@ import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
 import ArmorButton from '@/components/TierList/ArmorButton'
 import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
-import { Ranking } from '@/lib/rankings'
+import { AllType, Ranking, RankingType } from '@/lib/rankings'
 import { useSession } from 'next-auth/react'
+import DifficultyButton from '@/components/TierList/DifficultyButton'
 
 type TierListProps = {
   schaleData: SchaleDBData
   globalRankings: Ranking[]
-}
-
-enum RankingType {
-  Global = 'Global',
-  User = 'User',
 }
 
 const getStyle = (
@@ -63,13 +59,25 @@ export default function TierList({
 
   // Get details of the current raid, armour, difficulty
   const selectedRaid = raids.find((raid) => raid.Id === state.raid)
-  const selectedArmor = selectedRaid?.OptionTypes[state.armor]
-  const selectedDifficulty = selectedRaid?.OptionDifficulties[state.difficulty]
-
-  // Toggle between Global and User Rankings
-  const [rankingType, setRankingType] = useState<RankingType>(
-    RankingType.Global
-  )
+  const selectedArmor =
+    state.armor < 0 ? AllType.All : selectedRaid?.OptionTypes[state.armor]
+  const selectedDifficulty =
+    state.difficulty < 0
+      ? AllType.All
+      : selectedRaid?.OptionDifficulties[state.difficulty]
+  const rankingType = state.rankingType
+  const optionDifficulties = selectedRaid
+    ? [
+        ...selectedRaid.OptionDifficulties,
+        ...(rankingType === RankingType.User ? [AllType.All] : []),
+      ]
+    : []
+  const optionArmors = selectedRaid
+    ? [
+        ...selectedRaid.OptionTypes,
+        ...(rankingType === RankingType.User ? [AllType.All] : []),
+      ]
+    : []
 
   // Local storage for user rankings
   const [userRankings, setUserRankings] = useState<Ranking[] | undefined>(
@@ -136,33 +144,38 @@ export default function TierList({
     dispatch({ type: FilterActionTypes.SET_ARMOR, payload: armourIndex })
   }
 
-  const updateRanking = (newRanking: Ranking) => {
-    setUserRankings((prevRankings) => {
-      if (!prevRankings) {
-        // If the state is initially undefined, create a new array with the new ranking
-        return [newRanking]
-      }
-
-      // Check if an existing ranking has the same unique fields (other than tier)
-      const existingIndex = prevRankings.findIndex(
-        (r) =>
-          r.raidId === newRanking.raidId &&
-          r.armorType === newRanking.armorType &&
-          r.difficulty === newRanking.difficulty &&
-          r.studentId === newRanking.studentId
-      )
-
-      if (existingIndex !== -1) {
-        // Replace the existing ranking with the new one
-        const updatedRankings = [...prevRankings]
-        updatedRankings[existingIndex] = newRanking
-        return updatedRankings
-      } else {
-        // Add new ranking to the array
-        return [...prevRankings, newRanking]
-      }
-    })
+  // Change ranking type
+  const setRankingType = (rankingType: RankingType) => {
+    dispatch({ type: FilterActionTypes.SET_RANKING_TYPE, payload: rankingType })
   }
+
+  // const updateRanking = (newRanking: Ranking) => {
+  //   setUserRankings((prevRankings) => {
+  //     if (!prevRankings) {
+  //       // If the state is initially undefined, create a new array with the new ranking
+  //       return [newRanking]
+  //     }
+  //
+  //     // Check if an existing ranking has the same unique fields (other than tier)
+  //     const existingIndex = prevRankings.findIndex(
+  //       (r) =>
+  //         r.raidId === newRanking.raidId &&
+  //         r.armorType === newRanking.armorType &&
+  //         r.difficulty === newRanking.difficulty &&
+  //         r.studentId === newRanking.studentId
+  //     )
+  //
+  //     if (existingIndex !== -1) {
+  //       // Replace the existing ranking with the new one
+  //       const updatedRankings = [...prevRankings]
+  //       updatedRankings[existingIndex] = newRanking
+  //       return updatedRankings
+  //     } else {
+  //       // Add new ranking to the array
+  //       return [...prevRankings, newRanking]
+  //     }
+  //   })
+  // }
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) {
@@ -185,14 +198,14 @@ export default function TierList({
       return
     }
 
-    // Generate a new ranking
-    updateRanking({
-      raidId: selectedRaid.Id,
-      armorType: selectedArmor,
-      difficulty: selectedDifficulty,
-      studentId: studentId,
-      tier: tier,
-    })
+    // // Generate a new ranking
+    // updateRanking({
+    //   raidId: selectedRaid.Id,
+    //   armorType: selectedArmor,
+    //   difficulty: selectedDifficulty,
+    //   studentId: studentId,
+    //   tier: tier,
+    // })
   }
 
   // Get rankings for the current state
@@ -228,37 +241,38 @@ export default function TierList({
         </div>
 
         {/* Difficulty Selector */}
-        {selectedRaid && (
+        {optionDifficulties && (
           <div className='mb-4 flex space-x-4'>
-            {selectedRaid.OptionDifficulties.map((difficulty, index) => {
-              const selectedClass =
-                state.difficulty === index
-                  ? 'bg-gray-400 hover:bg-gray-300'
-                  : 'bg-gray-600 hover:bg-gray-500'
+            {optionDifficulties.map((difficulty, index) => {
+              // Treat All as -1
+              const value = difficulty === AllType.All ? -1 : index
               return (
-                <button
+                <DifficultyButton
                   key={difficulty}
-                  onClick={() => changeDifficulty(index)}
-                  className={`rounded px-4 py-2 font-semibold text-gray-800 ${selectedClass}`}
-                >
-                  {difficulty}
-                </button>
+                  difficulty={difficulty}
+                  selected={state.difficulty == value}
+                  onClick={() => changeDifficulty(value)}
+                />
               )
             })}
           </div>
         )}
 
         {/* Color Selector */}
-        {selectedRaid && (
+        {optionArmors && (
           <div className='mb-4 flex space-x-4'>
-            {selectedRaid.OptionTypes.map((armor, index) => (
-              <ArmorButton
-                key={armor}
-                armor={armor}
-                selected={state.armor === index}
-                onClick={() => changeArmour(index)}
-              />
-            ))}
+            {optionArmors.map((armor, index) => {
+              // Treat All as -1
+              const value = armor === AllType.All ? -1 : index
+              return (
+                <ArmorButton
+                  key={armor}
+                  armor={armor}
+                  selected={state.armor === value}
+                  onClick={() => changeArmour(value)}
+                />
+              )
+            })}
           </div>
         )}
 

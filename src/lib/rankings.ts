@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
-import { ArmorType, Difficulty } from '@/lib/shaleDbTypes'
-import { Tier } from '@/lib/tiers' // Adjust the path based on your setup
+import { Tier } from '@/lib/tiers'
+import { ArmorType, Difficulty } from '@prisma/client' // Adjust the path based on your setup
 
 export type Ranking = {
   raidId: number
@@ -9,6 +9,19 @@ export type Ranking = {
   studentId: number
   tier: Tier
 }
+
+export enum RankingType {
+  Global = 'Global',
+  User = 'User',
+}
+
+export enum AllType {
+  All = 'All',
+}
+
+export type AllArmorType = ArmorType | AllType
+
+export type AllDifficulty = Difficulty | AllType
 
 // Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
 export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
@@ -40,7 +53,7 @@ export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
 
 export const filterRankings = (
   rankings: Ranking[],
-  raid: string,
+  raid: number,
   armor: ArmorType,
   difficulty: Difficulty
 ) => {

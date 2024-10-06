@@ -1,3 +1,5 @@
+import { ArmorType, Difficulty } from '@prisma/client'
+
 export enum SquadType {
   Main = 'Main',
   Support = 'Support',
@@ -15,14 +17,6 @@ export enum BulletType {
   Pierce = 'Pierce',
   Mystic = 'Mystic',
   Elastic = 'Elastic',
-}
-
-export enum ArmorType {
-  Normal = 'Normal',
-  LightArmor = 'LightArmor',
-  HeavyArmor = 'HeavyArmor',
-  Unarmed = 'Unarmed', // aka mystic
-  ElasticArmor = 'ElasticArmor',
 }
 
 type SkillEffect = {
@@ -153,21 +147,6 @@ export type Student = {
   SkillExMaterialAmount: number[][]
   SkillMaterial: number[][]
   SkillMaterialAmount: number[][]
-}
-
-export enum Difficulty {
-  // Normal types
-  Normal = 'Normal',
-  Hard = 'Hard',
-  VeryHard = 'VeryHard',
-  Hardcore = 'Hardcore',
-  Extreme = 'Extreme',
-  Insane = 'Insane',
-  Torment = 'Torment',
-
-  // FoS break up into two groups
-  Floor1_49 = 'Floor1_49',
-  Floor50_125 = 'Floor50_124',
 }
 
 export enum RaidType {

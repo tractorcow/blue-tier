@@ -1,4 +1,5 @@
-import { ArmorType, Difficulty, SquadType } from '@/lib/shaleDbTypes'
+import { SquadType } from '@/lib/shaleDbTypes'
+import { ArmorType, Difficulty } from '@prisma/client'
 
 export enum Tier {
   SS = 'SS',

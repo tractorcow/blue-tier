@@ -1,11 +1,5 @@
-import {
-  ArmorType,
-  Difficulty,
-  RaidBase,
-  RaidType,
-  SchaleDBData,
-  Student,
-} from '@/lib/shaleDbTypes'
+import { RaidBase, RaidType, SchaleDBData, Student } from '@/lib/shaleDbTypes'
+import { ArmorType, Difficulty } from '@prisma/client'
 
 const dataUrl = (type: string): string => {
   return `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/data/en/${type}.min.json`
