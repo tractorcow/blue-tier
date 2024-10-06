@@ -10,8 +10,7 @@ import {
   Droppable,
   DropResult,
 } from '@hello-pangea/dnd'
-import { Ranking } from '@prisma/client'
-import { SchaleDBData, Student } from '@/lib/shaledb/types'
+import type { SchaleDBData, Student } from '@/lib/shaledb/types'
 import { AllTiers, SquadTypes } from '@/lib/ranking/lists'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
@@ -22,12 +21,14 @@ import AuthComponent from '@/components/Auth/AuthComponent'
 import {
   AllArmorType,
   AllDifficulty,
+  AllTier,
   AllType,
+  Ranking,
   RankingType,
+  UnrankedType,
 } from '@/lib/ranking/types'
 import DifficultyButton from '@/components/TierList/DifficultyButton'
-import { AllTier } from '@/lib/ranking/types'
-import { calculateRankings } from '@/lib/ranking'
+import { calculateRankings, generateRankings } from '@/lib/ranking'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -166,33 +167,39 @@ export default function TierList({
     dispatch({ type: FilterActionTypes.SET_RANKING_TYPE, payload: rankingType })
   }
 
-  // const updateRanking = (newRanking: Ranking) => {
-  //   setUserRankings((prevRankings) => {
-  //     if (!prevRankings) {
-  //       // If the state is initially undefined, create a new array with the new ranking
-  //       return [newRanking]
-  //     }
-  //
-  //     // Check if an existing ranking has the same unique fields (other than tier)
-  //     const existingIndex = prevRankings.findIndex(
-  //       (r) =>
-  //         r.raidId === newRanking.raidId &&
-  //         r.armorType === newRanking.armorType &&
-  //         r.difficulty === newRanking.difficulty &&
-  //         r.studentId === newRanking.studentId
-  //     )
-  //
-  //     if (existingIndex !== -1) {
-  //       // Replace the existing ranking with the new one
-  //       const updatedRankings = [...prevRankings]
-  //       updatedRankings[existingIndex] = newRanking
-  //       return updatedRankings
-  //     } else {
-  //       // Add new ranking to the array
-  //       return [...prevRankings, newRanking]
-  //     }
-  //   })
-  // }
+  const updateRankings = (newRankings: Ranking[]) => {
+    setUserRankings((prevRankings) => {
+      if (!prevRankings) {
+        // If the state is initially undefined, create a new array with the new rankings
+        return [...newRankings]
+      }
+
+      // Create a copy of the current rankings to modify
+      const updatedRankings = [...prevRankings]
+
+      // Iterate through each new ranking and either replace or add it to the updatedRankings array
+      newRankings.forEach((newRanking) => {
+        // Check if an existing ranking has the same unique fields (other than tier)
+        const existingIndex = updatedRankings.findIndex(
+          (r) =>
+            r.raidId === newRanking.raidId &&
+            r.armorType === newRanking.armorType &&
+            r.difficulty === newRanking.difficulty &&
+            r.studentId === newRanking.studentId
+        )
+
+        if (existingIndex !== -1) {
+          // Replace the existing ranking with the new one
+          updatedRankings[existingIndex] = newRanking
+        } else {
+          // Add the new ranking to the array
+          updatedRankings.push(newRanking)
+        }
+      })
+
+      return updatedRankings
+    })
+  }
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) {
@@ -202,6 +209,11 @@ export default function TierList({
     // Get the tier from the droppableId, e.g. "SS-Main" -> "SS"
     const tier = result.destination.droppableId.split('-')?.[0] as AllTier
     const studentId = parseInt(result.draggableId)
+
+    if (tier === UnrankedType.Unranked) {
+      resolveError('Un-ranking students is not supported')
+      return
+    }
 
     // Validate we have all the details for this ranking
     if (
@@ -215,14 +227,15 @@ export default function TierList({
       return
     }
 
-    // // Generate a new ranking
-    // updateRanking({
-    //   raidId: selectedRaid.Id,
-    //   armorType: selectedArmor,
-    //   difficulty: selectedDifficulty,
-    //   studentId: studentId,
-    //   tier: tier,
-    // })
+    // Save all rankings
+    const newRankings = generateRankings(
+      studentId,
+      tier,
+      selectedRaid,
+      selectedDifficulty,
+      selectedArmor
+    )
+    updateRankings(newRankings)
   }
 
   // Get rankings for the current state
@@ -342,7 +355,7 @@ export default function TierList({
               </div>
             ))}
 
-            {/* Repeated Rows for SS, S, A, B, C, D, and Unranked */}
+            {/* Repeated Rows for SS, S, A, B, C, D, and Unranked (non-droppable) */}
             <DragDropContext onDragEnd={handleDragEnd}>
               {AllTiers.map((tier) => (
                 <React.Fragment key={tier}>
@@ -351,6 +364,7 @@ export default function TierList({
                     <Droppable
                       key={category.squadType}
                       droppableId={`${tier}-${category.squadType}`}
+                      isDropDisabled={tier == UnrankedType.Unranked}
                     >
                       {(provided) => (
                         <div

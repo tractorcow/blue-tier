@@ -1,11 +1,12 @@
 import prisma from '@/lib/prisma'
-import { ArmorType, Difficulty, Ranking } from '@prisma/client'
+import { Tier } from '@prisma/client'
 import { RaidBase, Student } from '@/lib/shaledb/types'
 import {
   AllArmorType,
   AllDifficulty,
   AllTier,
   AllType,
+  Ranking,
   UnrankedType,
 } from '@/lib/ranking/types'
 import { AllTiers } from '@/lib/ranking/lists'
@@ -36,28 +37,6 @@ export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
     FROM "rankings"
     WHERE "user_id" = ${userId}
   `
-}
-
-export const filterRankings = (
-  rankings: Ranking[],
-  raid: number,
-  armor: ArmorType,
-  difficulty: Difficulty
-) => {
-  // Validate each tier
-  for (const tier of AllTiers) {
-    const found = rankings.find(
-      (ranking) =>
-        ranking.raidId === raid &&
-        ranking.armorType === armor &&
-        ranking.difficulty === difficulty &&
-        ranking.tier === tier
-    )
-
-    if (!found) {
-      return false
-    }
-  }
 }
 
 /**
@@ -172,4 +151,67 @@ export const calculateRankings = (
   })
 
   return groups
+}
+
+/**
+ * Given a student, tier, raid, difficulty, and armor type, generate a set of rankings.
+ * If difficulty or armour are "All", then all rankings for that raid should be generated.
+ *
+ * @param studentId
+ * @param tier
+ * @param selectedRaid
+ * @param selectedDifficulty
+ * @param selectedArmor
+ */
+export const generateRankings = (
+  studentId: number,
+  tier: Tier,
+  selectedRaid: RaidBase,
+  selectedDifficulty: AllDifficulty,
+  selectedArmor: AllArmorType
+): Ranking[] => {
+  const rankings: Ranking[] = []
+
+  // Check if generating all difficulties
+  if (selectedDifficulty === AllType.All) {
+    for (const difficulty of selectedRaid.OptionDifficulties) {
+      rankings.push(
+        ...generateRankings(
+          studentId,
+          tier,
+          selectedRaid,
+          difficulty,
+          selectedArmor
+        )
+      )
+    }
+    return rankings
+  }
+
+  // Check if generating all armor types
+  if (selectedArmor === AllType.All) {
+    for (const armor of selectedRaid.OptionTypes) {
+      rankings.push(
+        ...generateRankings(
+          studentId,
+          tier,
+          selectedRaid,
+          selectedDifficulty,
+          armor
+        )
+      )
+    }
+    return rankings
+  }
+
+  // Generate a single ranking
+  rankings.push({
+    studentId,
+    raidId: selectedRaid.Id,
+    difficulty: selectedDifficulty,
+    armorType: selectedArmor,
+    tier,
+  })
+
+  return rankings
 }
