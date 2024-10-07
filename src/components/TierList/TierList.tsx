@@ -29,6 +29,8 @@ import {
 } from '@/lib/ranking/types'
 import DifficultyButton from '@/components/TierList/DifficultyButton'
 import { calculateRankings, generateRankings } from '@/lib/ranking'
+import useAsyncQueue from '@/state/AsyncQueue'
+import { fetchRankings, saveRankings } from '@/lib/user'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -117,15 +119,7 @@ export default function TierList({
         try {
           setLoading(true)
           setError(undefined) // Reset error state
-
-          // Fetch details from /api/rankings/[userId]
-          const response = await fetch(`/api/rankings/${session.user.id}`)
-          if (!response.ok) {
-            resolveError(`Failed to load rankings: ${response.statusText}`)
-            return
-          }
-
-          const data: Ranking[] = await response.json()
+          const data = await fetchRankings(session)
           setUserRankings(data)
         } catch (err: unknown) {
           resolveError(err)
@@ -167,7 +161,23 @@ export default function TierList({
     dispatch({ type: FilterActionTypes.SET_RANKING_TYPE, payload: rankingType })
   }
 
+  // Setup queue for saving rankings to the database
+  // This does a bit of batching and has a debounce timer of 1.2 seconds
+  // to prevent lots of requests being sent at once
+  const { enqueue } = useAsyncQueue<Ranking>(
+    async (rankings) => {
+      await saveRankings(rankings, session)
+    },
+    {
+      debounceTime: 1200,
+    }
+  )
+
   const updateRankings = (newRankings: Ranking[]) => {
+    // Store rankings in DB
+    enqueue(newRankings)
+
+    // Update local state
     setUserRankings((prevRankings) => {
       if (!prevRankings) {
         // If the state is initially undefined, create a new array with the new rankings
