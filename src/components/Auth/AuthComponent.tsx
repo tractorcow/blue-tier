@@ -2,6 +2,10 @@
 
 import { useSession, signIn, signOut } from 'next-auth/react'
 
+export const signInWithDiscord = () => {
+  signIn('discord')
+}
+
 export default function AuthComponent() {
   const { data: session } = useSession()
 
@@ -15,9 +19,7 @@ export default function AuthComponent() {
       ) : (
         <>
           <p>Not signed in</p>
-          <button onClick={() => signIn('discord')}>
-            Sign in with Discord
-          </button>
+          <button onClick={signInWithDiscord}>Sign in with Discord</button>
         </>
       )}
     </div>

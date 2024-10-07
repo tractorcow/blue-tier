@@ -1,5 +1,6 @@
 import React from 'react'
-import { ArmorType } from '@/lib/shaleDbTypes'
+import { ArmorType } from '@prisma/client'
+import { AllArmorType, AllType } from '@/lib/ranking/types'
 
 const ArmorClasses = {
   [ArmorType.Normal]: {
@@ -27,10 +28,15 @@ const ArmorClasses = {
     label: 'Elastic',
     selected: 'bg-purple-500 hover:bg-purple-600',
   },
+  [AllType.All]: {
+    class: 'bg-green-300 hover:bg-green-400',
+    label: 'All',
+    selected: 'bg-green-500 hover:bg-green-600',
+  },
 }
 
 type ArmorButtonProps = {
-  armor: ArmorType
+  armor: AllArmorType
   onClick?: React.MouseEventHandler<HTMLButtonElement>
   selected: boolean
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import type { RaidBase } from '@/lib/shaleDbTypes'
+import type { RaidBase } from '@/lib/shaledb/types'
 import Image from 'next/image'
 
 type RaidCardProps = {

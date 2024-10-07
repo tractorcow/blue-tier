@@ -1,10 +1,5 @@
-import {
-  ArmorType,
-  Difficulty,
-  RaidBase,
-  RaidType,
-  SchaleDBData,
-} from '@/lib/shaleDbTypes'
+import { RaidBase, RaidType, SchaleDBData, Student } from '@/lib/shaledb/types'
+import { ArmorType, Difficulty } from '@prisma/client'
 
 const dataUrl = (type: string): string => {
   return `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/data/en/${type}.min.json`
@@ -61,6 +56,10 @@ const fetchData = async (): Promise<SchaleDBData> => {
     OptionDifficulties: [Difficulty.Floor1_49, Difficulty.Floor50_125],
     ...raidData['MultiFloorRaid'][0],
   })
+
+  // Sort students by name
+  ;(students as Student[]).sort((a, b) => a.Name.localeCompare(b.Name))
+
   return {
     raids,
     students,
