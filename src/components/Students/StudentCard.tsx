@@ -2,7 +2,7 @@ import React from 'react'
 import { BulletType, Student } from '@/lib/shaledb/types'
 import Image from 'next/image'
 import { Optional } from '@/lib/types'
-import { imageUrl, roleIcon, studentIcon } from '@/lib/shaledb'
+import { roleIcon, studentIcon } from '@/lib/shaledb'
 
 export interface StudentCardProps {
   student: Student
@@ -15,7 +15,7 @@ const StudentCard = ({ student, bulletType }: StudentCardProps) => {
   const iconImage = studentIcon(student)
 
   // Icon for the student's role
-  const roleIcon = roleIcon(student.TacticRole)
+  const role = roleIcon(student.TacticRole)
 
   return (
     <div
