@@ -31,6 +31,7 @@ import DifficultyButton from '@/components/TierList/DifficultyButton'
 import { calculateRankings, generateRankings } from '@/lib/ranking'
 import useAsyncQueue from '@/state/AsyncQueue'
 import { fetchRankings, saveRankings } from '@/lib/user'
+import { determineBulletType } from '@/lib/raids'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -252,6 +253,8 @@ export default function TierList({
   const sourceRankings =
     rankingType === RankingType.Global ? globalRankings : userRankings || []
 
+  const bulletType = determineBulletType(selectedRaid, selectedDifficulty)
+
   const rankings = calculateRankings(
     students,
     sourceRankings,
@@ -406,7 +409,10 @@ export default function TierList({
                                       snapshot
                                     )}
                                   >
-                                    <StudentCard student={student} />
+                                    <StudentCard
+                                      student={student}
+                                      bulletType={bulletType}
+                                    />
                                   </div>
                                 )}
                               </Draggable>

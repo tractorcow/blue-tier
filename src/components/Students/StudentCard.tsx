@@ -1,12 +1,16 @@
 import React from 'react'
-import type { Student } from '@/lib/shaledb/types'
+import { BulletType, Student } from '@/lib/shaledb/types'
 import Image from 'next/image'
+import { Optional } from '@/lib/types'
 
 export interface StudentCardProps {
   student: Student
+  bulletType: Optional<BulletType>
 }
 
-const StudentCard = ({ student }: StudentCardProps) => {
+const StudentCard = ({ student, bulletType }: StudentCardProps) => {
+  // @todo - compare boss bullet type to this student's armor type
+  console.log(bulletType)
   const iconImage = `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/images/student/icon/${student.Id}.webp`
   return (
     <div
