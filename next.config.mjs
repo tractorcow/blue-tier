@@ -6,6 +6,7 @@ const nextConfig = {
         hostname: 'cdn.jsdelivr.net',
       },
     ],
+    domains: ['raw.githubusercontent.com'],
   },
 }
 
