@@ -39,6 +39,37 @@ export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
   `
 }
 
+export const updateUserRankings = async (
+  userId: string,
+  rankings: Ranking[]
+) => {
+  // For each ranking we must do an upsert
+  for (const ranking of rankings) {
+    await prisma.ranking.upsert({
+      where: {
+        raidId_armorType_difficulty_studentId_userId: {
+          raidId: ranking.raidId,
+          studentId: ranking.studentId,
+          difficulty: ranking.difficulty,
+          armorType: ranking.armorType,
+          userId: userId,
+        },
+      },
+      create: {
+        raidId: ranking.raidId,
+        studentId: ranking.studentId,
+        difficulty: ranking.difficulty,
+        armorType: ranking.armorType,
+        userId: userId,
+        tier: ranking.tier,
+      },
+      update: {
+        tier: ranking.tier,
+      },
+    })
+  }
+}
+
 /**
  * Validate that a ranking exists for a given set of options
  *

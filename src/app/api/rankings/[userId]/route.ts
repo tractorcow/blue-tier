@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { fetchDataForUser } from '@/lib/ranking'
+import { fetchDataForUser, updateUserRankings } from '@/lib/ranking'
 import authOptions from '@/lib/authoptions'
 import { Ranking } from '@/lib/ranking/types'
 
@@ -69,8 +69,8 @@ export async function POST(
   }
 
   try {
-    // @TODO: Save the data to the database
-    console.log(body, userId, 'posted body')
+    // Save to db
+    await updateUserRankings(userId, body)
 
     // Save the data to the database
     return NextResponse.json({ success: true }, { status: 200 })
