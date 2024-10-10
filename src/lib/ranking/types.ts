@@ -11,6 +11,9 @@ export type Ranking = Omit<
   'id' | 'createdAt' | 'updatedAt' | 'userId'
 >
 
+// just the unique identifiable fields from ranking
+export type RankingId = Omit<Ranking, 'tier'>
+
 export enum RankingType {
   Global = 'Global',
   User = 'User',
