@@ -5,6 +5,14 @@ export enum SquadType {
   Support = 'Support',
 }
 
+export enum TacticRole {
+  DamageDealer = 'DamageDealer',
+  Supporter = 'Supporter',
+  Healer = 'Healer',
+  Tanker = 'Tanker',
+  Vehicle = 'Vehicle',
+}
+
 export enum Terrain {
   Indoor = 'Indoor',
   Outdoor = 'Outdoor',
@@ -87,7 +95,7 @@ export type Student = {
   Club: string
   StarGrade: number
   SquadType: SquadType
-  TacticRole: string
+  TacticRole: TacticRole
   Summons: Summon[]
   Position: string
   BulletType: BulletType
@@ -186,7 +194,7 @@ export interface Raid extends RaidBase {
   Profile: string
 }
 
-export interface MultiFloorRaid {
+export interface MultiFloorRaid extends RaidBase {
   DifficultyStartFloor: number[]
   BulletType: BulletType[]
 }

@@ -1,30 +1,51 @@
 import React from 'react'
-import type { RaidBase } from '@/lib/shaledb/types'
+import { RaidBase } from '@/lib/shaledb/types'
+import { AllArmorType, AllDifficulty, AllType } from '@/lib/ranking/types'
+import { determineBulletType } from '@/lib/raids'
+import { Optional } from '@/lib/types'
+import { attackIcon, defenseIcon } from '@/lib/shaledb'
 import Image from 'next/image'
+import { armorClasses, bulletClasses } from '@/components/colors'
 
 type RaidCardProps = {
   raid: RaidBase
+  difficulty: Optional<AllDifficulty>
+  armor: Optional<AllArmorType>
 }
 
-const RaidCard = ({ raid }: RaidCardProps) => {
+const RaidCard = ({ raid, difficulty, armor }: RaidCardProps) => {
+  const bulletType = determineBulletType(raid, difficulty)
+  const bulletIcon = attackIcon()
+  const armorIcon = defenseIcon()
+  const bulletBg = bulletType ? bulletClasses[bulletType] : null
+  const armorBg = armor && armor !== AllType.All ? armorClasses[armor] : null
   const iconImage = `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/images/raid/Boss_Portrait_${raid.PathName}_Lobby.png`
   return (
-    <div className='flex w-1/2 items-center rounded border border-gray-300 bg-white p-4 dark:border-gray-600 dark:bg-gray-800'>
-      {/* Raid Icon, scaled from 650 x 200 */}
-      <div className='mr-4 h-12 w-40 bg-gray-300 dark:bg-gray-600'>
-        <Image
-          src={iconImage}
-          alt={raid.Name}
-          width={650}
-          height={200}
-          className='rounded'
-        />
-      </div>
-      <div>
-        <strong className='text-gray-800 dark:text-gray-100'>
-          {raid.Name}
-        </strong>
-      </div>
+    <div
+      className='relative flex flex-col justify-between overflow-hidden rounded-lg bg-right p-6'
+      style={{
+        backgroundImage: `url(${iconImage})`,
+        backgroundPosition: 'right',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <h2 className='mb-2 text-2xl font-bold'>{raid.Name}</h2>
+      {bulletBg && armorBg && (
+        <div className='absolute right-1 top-1 flex flex-row space-x-2'>
+          <div className={`w-5 rounded-full p-1 ${bulletBg}`}>
+            <Image
+              src={bulletIcon}
+              alt={`${bulletType}`}
+              width={32}
+              height={32}
+            />
+          </div>
+          <div className={`w-5 rounded-full p-1 ${armorBg}`}>
+            <Image src={armorIcon} alt={`${armor}`} width={32} height={32} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
