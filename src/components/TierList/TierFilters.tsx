@@ -38,28 +38,13 @@ export default function TierFilters({
   return (
     <div className='flex w-full flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0'>
       <div className='lg:flex-grow'>
-        <div className=''>
-          <select
-            id='raid-select'
-            onChange={(e) => changeRaid(parseInt(e.target.value))}
-            value={selectedRaid?.Id || 0}
-            className='w-full rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
-          >
-            <option value={0}>Select Raid</option>
-            {raids.map((raid) => (
-              <option key={raid.Id} value={raid.Id}>
-                {raid.Name}
-              </option>
-            ))}
-          </select>
-        </div>
-        {selectedRaid && (
-          <RaidCard
-            raid={selectedRaid}
-            difficulty={selectedDifficulty}
-            armor={selectedArmor}
-          />
-        )}
+        <RaidCard
+          raids={raids}
+          changeRaid={changeRaid}
+          raid={selectedRaid}
+          difficulty={selectedDifficulty}
+          armor={selectedArmor}
+        />
       </div>
       <div className='lg:flex-grow'>
         {/* Difficulty Selector */}
