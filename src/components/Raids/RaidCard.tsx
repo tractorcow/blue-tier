@@ -32,7 +32,7 @@ const RaidCard = ({
     : null
   return (
     <div
-      className='relative flex flex-col justify-between overflow-hidden rounded-lg bg-right p-6 py-8 dark:bg-gray-800'
+      className='relative flex h-full flex-col justify-between overflow-hidden rounded-lg bg-right p-6 py-8 dark:bg-gray-800'
       style={{
         backgroundImage: iconImage ? `url(${iconImage})` : undefined,
         backgroundPosition: 'right',
