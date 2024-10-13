@@ -65,7 +65,7 @@ export const determineBulletType = (
   if (isMultiFloorRaid(raid) && raid.BulletType.length > 0) {
     // multifloor raid bullet type is based on either first or last floor
     if (insaneTypes.includes(difficulty)) {
-      return raid.BulletType[raid.DifficultyStartFloor.length - 1]
+      return raid.BulletType[raid.BulletType.length - 1]
     }
 
     // If not insane just use the easiest bullet type
