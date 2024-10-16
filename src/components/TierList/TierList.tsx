@@ -15,8 +15,6 @@ import { AllTiers, SquadTypes } from '@/lib/ranking/lists'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
-import ArmorButton from '@/components/TierList/ArmorButton'
-import RaidCard from '@/components/Raids/RaidCard'
 import AuthComponent from '@/components/Auth/AuthComponent'
 import {
   AllArmorType,
@@ -27,10 +25,16 @@ import {
   RankingType,
   UnrankedType,
 } from '@/lib/ranking/types'
-import DifficultyButton from '@/components/TierList/DifficultyButton'
-import { calculateRankings, generateRankings } from '@/lib/ranking'
+import {
+  calculateRankings,
+  filterStudentsByName,
+  generateRankings,
+} from '@/lib/ranking'
 import useAsyncQueue from '@/state/AsyncQueue'
 import { fetchRankings, saveRankings } from '@/lib/user'
+import TierFilters from '@/components/TierList/TierFilters'
+import ModeToggle from '@/components/TierList/ModeToggle'
+import LoadingOverlay from '@/components/TierList/Loading'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -89,6 +93,9 @@ export default function TierList({
         ...(rankingType === RankingType.User ? [AllType.All] : []),
       ]
     : []
+
+  // State for name filter
+  const [nameFilter, setNameFilter] = useState<string>('')
 
   // Local storage for user rankings
   const [userRankings, setUserRankings] = useState<Ranking[] | undefined>(
@@ -252,8 +259,11 @@ export default function TierList({
   const sourceRankings =
     rankingType === RankingType.Global ? globalRankings : userRankings || []
 
+  // Filter students
+  const filteredStudents = filterStudentsByName(students, nameFilter)
+
   const rankings = calculateRankings(
-    students,
+    filteredStudents,
     sourceRankings,
     selectedRaid,
     selectedDifficulty,
@@ -261,165 +271,125 @@ export default function TierList({
   )
 
   return (
-    <div className='container mx-auto px-4 py-6 dark:bg-gray-900'>
-      <AuthComponent />
+    <div className='container mx-auto'>
       {/* Header Section */}
-      <div className='mb-8 border-b-2 border-gray-300 pb-4 dark:border-gray-700'>
-        {/* Boss Selector and Info Box */}
-        <div className='mb-4 flex justify-between'>
-          <select
-            value={state.raid}
-            onChange={(e) => changeBoss(parseInt(e.target.value))}
-            className='rounded border border-gray-300 px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
-          >
-            <option value={0}>Select Raid</option>
-            {raids.map((raid) => (
-              <option key={raid.Id} value={raid.Id}>
-                {raid.Name}
-              </option>
-            ))}
-          </select>
-          {selectedRaid && <RaidCard raid={selectedRaid} />}
+      <div className='flex flex-row justify-between py-4'>
+        <h1 className='text-xl font-bold'>Blue Archive Tier List</h1>
+        <div className='ml-auto flex items-center space-x-4'>
+          {session && (
+            <ModeToggle
+              onChange={(e) => {
+                setRankingType(
+                  e.target.checked ? RankingType.User : RankingType.Global
+                )
+              }}
+              selected={rankingType == RankingType.User}
+            >
+              Edit My Rankings
+            </ModeToggle>
+          )}
+          <AuthComponent />
         </div>
-
-        {/* Difficulty Selector */}
-        {optionDifficulties && (
-          <div className='mb-4 flex space-x-4'>
-            {optionDifficulties.map((difficulty) => {
-              return (
-                <DifficultyButton
-                  key={difficulty}
-                  difficulty={difficulty}
-                  selected={selectedDifficulty === difficulty}
-                  onClick={() => changeDifficulty(difficulty)}
-                />
-              )
-            })}
-          </div>
-        )}
-
-        {/* Color Selector */}
-        {optionArmors && (
-          <div className='mb-4 flex space-x-4'>
-            {optionArmors.map((armor) => {
-              return (
-                <ArmorButton
-                  key={armor}
-                  armor={armor}
-                  selected={selectedArmor === armor}
-                  onClick={() => changeArmour(armor)}
-                />
-              )
-            })}
-          </div>
-        )}
-
-        {/* Filter Box */}
-        <input
-          type='text'
-          className='w-1/2 rounded border border-gray-300 bg-white px-4 py-2 text-gray-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200'
-          placeholder='Filter by Student Name'
-        />
       </div>
 
-      {/* Main Area */}
-      <div className='flex flex-col space-y-4'>
-        {/* Global Rankings Toggle */}
-        <div className='text-right'>
-          <label className='mr-4 text-gray-800 dark:text-gray-300'>
+      <div className='space-y-4 px-4 py-6 dark:bg-gray-900'>
+        <TierFilters
+          raids={raids}
+          selectedRaid={selectedRaid}
+          changeRaid={changeBoss}
+          difficulties={optionDifficulties}
+          selectedDifficulty={selectedDifficulty}
+          changeDifficulty={changeDifficulty}
+          armors={optionArmors}
+          selectedArmor={selectedArmor}
+          changeArmour={changeArmour}
+        />
+
+        {/* Main Area */}
+        <div className='flex flex-col space-y-4'>
+          {/* Global Rankings Toggle */}
+          <div className='text-right'>
             <input
-              type='radio'
-              name='view'
-              checked={rankingType === RankingType.Global}
-              onChange={() => setRankingType(RankingType.Global)}
-              className='mr-2'
-            />{' '}
-            Global Rankings
-          </label>
-          <label className='text-gray-800 dark:text-gray-300'>
-            <input
-              type='radio'
-              name='view'
-              className='mr-2'
-              checked={rankingType == RankingType.User}
-              onChange={() => setRankingType(RankingType.User)}
-              disabled={!session}
-            />{' '}
-            {session ? 'My Rankings' : 'Login to Rank'}
-          </label>
-        </div>
+              type='text'
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+              placeholder='Filter students by name'
+              className='w-full rounded-lg border-0 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500'
+            />
+          </div>
 
-        {loading && <div>Loading your rankings...</div>}
+          {loading && <LoadingOverlay />}
 
-        {/* Tier Rows */}
-        <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
-          <div className='grid grid-cols-[150px_1fr_1fr] gap-4 p-4'>
-            {/*Header Row*/}
-            <div />
-            {SquadTypes.map((category) => (
-              <div
-                key={category.title}
-                className='text-center text-lg font-bold'
-              >
-                {category.title}
-              </div>
-            ))}
-
-            {/* Repeated Rows for SS, S, A, B, C, D, and Unranked (non-droppable) */}
-            <DragDropContext onDragEnd={handleDragEnd}>
-              {AllTiers.map((tier) => (
-                <React.Fragment key={tier}>
-                  <div className='text-center font-semibold'>{tier}</div>
-                  {SquadTypes.map((category) => (
-                    <Droppable
-                      key={category.squadType}
-                      droppableId={`${tier}-${category.squadType}`}
-                      isDropDisabled={tier == UnrankedType.Unranked}
-                    >
-                      {(provided) => (
-                        <div
-                          className='flex flex-wrap content-start items-start justify-start gap-2'
-                          ref={provided.innerRef}
-                          {...provided.droppableProps}
-                        >
-                          <StudentList
-                            students={rankings[tier]}
-                            tier={tier}
-                            squadType={category.squadType}
-                          >
-                            {(student: Student, index: number) => (
-                              <Draggable
-                                key={student.Id}
-                                draggableId={student.Id.toString()}
-                                index={index}
-                                isDragDisabled={
-                                  rankingType === RankingType.Global
-                                }
-                              >
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    style={getStyle(
-                                      provided.draggableProps.style,
-                                      snapshot
-                                    )}
-                                  >
-                                    <StudentCard student={student} />
-                                  </div>
-                                )}
-                              </Draggable>
-                            )}
-                          </StudentList>
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  ))}
-                </React.Fragment>
+          {/* Tier Rows */}
+          <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
+            <div className='grid grid-cols-[150px_1fr_1fr] gap-4 p-4'>
+              {/*Header Row*/}
+              <div />
+              {SquadTypes.map((category) => (
+                <div
+                  key={category.title}
+                  className='text-center text-lg font-bold'
+                >
+                  {category.title}
+                </div>
               ))}
-            </DragDropContext>
+
+              {/* Repeated Rows for SS, S, A, B, C, D, and Unranked (non-droppable) */}
+              <DragDropContext onDragEnd={handleDragEnd}>
+                {AllTiers.map((tier) => (
+                  <React.Fragment key={tier}>
+                    <div className='text-center font-semibold'>{tier}</div>
+                    {SquadTypes.map((category) => (
+                      <Droppable
+                        key={category.squadType}
+                        droppableId={`${tier}-${category.squadType}`}
+                        isDropDisabled={tier == UnrankedType.Unranked}
+                      >
+                        {(provided) => (
+                          <div
+                            className='flex flex-wrap content-start items-start justify-start gap-2'
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                          >
+                            <StudentList
+                              students={rankings[tier]}
+                              tier={tier}
+                              squadType={category.squadType}
+                            >
+                              {(student: Student, index: number) => (
+                                <Draggable
+                                  key={student.Id}
+                                  draggableId={student.Id.toString()}
+                                  index={index}
+                                  isDragDisabled={
+                                    rankingType === RankingType.Global
+                                  }
+                                >
+                                  {(provided, snapshot) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      style={getStyle(
+                                        provided.draggableProps.style,
+                                        snapshot
+                                      )}
+                                    >
+                                      <StudentCard student={student} />
+                                    </div>
+                                  )}
+                                </Draggable>
+                              )}
+                            </StudentList>
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </DragDropContext>
+            </div>
           </div>
         </div>
       </div>

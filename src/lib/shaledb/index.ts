@@ -1,8 +1,38 @@
-import { RaidBase, RaidType, SchaleDBData, Student } from '@/lib/shaledb/types'
+import {
+  RaidBase,
+  RaidType,
+  SchaleDBData,
+  Student,
+  TacticRole,
+} from '@/lib/shaledb/types'
 import { ArmorType, Difficulty } from '@prisma/client'
 
 const dataUrl = (type: string): string => {
   return `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/data/en/${type}.min.json`
+}
+
+export const imageUrl = (path: string): string => {
+  return `https://cdn.jsdelivr.net/gh/SchaleDB/SchaleDB@main/images/${path}`
+}
+
+export const studentIcon = (student: Student): string => {
+  return imageUrl(`student/icon/${student.Id}.webp`)
+}
+
+export const attackIcon = (): string => {
+  return imageUrl('ui/Type_Attack_s.png')
+}
+
+export const defenseIcon = (): string => {
+  return imageUrl('ui/Type_Defense_s.png')
+}
+
+/**
+ * Generate image for role icon
+ * @param role
+ */
+export const roleIcon = (role: TacticRole): string => {
+  return imageUrl(`ui/Role_${role}.png`)
 }
 
 const fetchDataSource = async (type: string) => {

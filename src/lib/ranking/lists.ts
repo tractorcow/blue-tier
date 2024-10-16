@@ -1,6 +1,11 @@
 import { ArmorType, Difficulty, Tier } from '@prisma/client'
-import { AllTier, UnrankedType } from '@/lib/ranking/types'
-import { SquadType } from '@/lib/shaledb/types'
+import {
+  AllArmorType,
+  AllTier,
+  AllType,
+  UnrankedType,
+} from '@/lib/ranking/types'
+import { BulletType, SquadType } from '@/lib/shaledb/types'
 
 export const AllTiers: AllTier[] = [
   Tier.SS,
@@ -11,6 +16,23 @@ export const AllTiers: AllTier[] = [
   Tier.D,
   UnrankedType.Unranked,
 ]
+
+export const armorNames: Record<AllArmorType, string> = {
+  [ArmorType.Normal]: 'Normal',
+  [ArmorType.LightArmor]: 'Light',
+  [ArmorType.HeavyArmor]: 'Heavy',
+  [ArmorType.Unarmed]: 'Special',
+  [ArmorType.ElasticArmor]: 'Elastic',
+  [AllType.All]: 'All',
+}
+
+export const bulletNames: Record<BulletType, string> = {
+  [BulletType.Normal]: 'Normal',
+  [BulletType.Explosion]: 'Explosive',
+  [BulletType.Pierce]: 'Piercing',
+  [BulletType.Mystic]: 'Mystic',
+  [BulletType.Elastic]: 'Elastic',
+}
 
 export const SquadTypes = [
   {

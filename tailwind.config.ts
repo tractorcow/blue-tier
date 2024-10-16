@@ -11,6 +11,12 @@ const config: Config = {
       colors: {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
+        // Blue archive attack / defense colours
+        normal: 'var(--color-normal)',
+        explosive: 'var(--color-explosive)',
+        piercing: 'var(--color-piercing)',
+        mystic: 'var(--color-mystic)',
+        sonic: 'var(--color-sonic)',
       },
     },
   },

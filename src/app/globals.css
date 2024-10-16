@@ -5,6 +5,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --color-normal: rgb(72, 85, 130);
+  --color-explosive: rgb(167, 12, 25);
+  --color-piercing: rgb(178, 109, 31);
+  --color-mystic: rgb(33, 111, 156);
+  --color-sonic: rgb(148, 49, 165);
 }
 
 @media (prefers-color-scheme: dark) {

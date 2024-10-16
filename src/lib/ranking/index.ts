@@ -246,3 +246,17 @@ export const generateRankings = (
 
   return rankings
 }
+
+/**
+ * Filter students by name
+ * @param students
+ * @param nameFilter
+ */
+export const filterStudentsByName = (
+  students: Student[],
+  nameFilter: string
+): Student[] => {
+  return students.filter((student) =>
+    student.Name.toLowerCase().includes(nameFilter.toLowerCase())
+  )
+}
