@@ -24,7 +24,7 @@ export enum BulletType {
   Explosion = 'Explosion',
   Pierce = 'Pierce',
   Mystic = 'Mystic',
-  Elastic = 'Elastic',
+  Sonic = 'Sonic',
 }
 
 type SkillEffect = {

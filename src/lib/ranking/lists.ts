@@ -31,7 +31,7 @@ export const bulletNames: Record<BulletType, string> = {
   [BulletType.Explosion]: 'Explosive',
   [BulletType.Pierce]: 'Piercing',
   [BulletType.Mystic]: 'Mystic',
-  [BulletType.Elastic]: 'Elastic',
+  [BulletType.Sonic]: 'Sonic',
 }
 
 export const SquadTypes = [
