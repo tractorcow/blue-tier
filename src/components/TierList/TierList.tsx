@@ -339,7 +339,7 @@ export default function TierList({
                 {AllTiers.map((tier) => (
                   <React.Fragment key={tier}>
                     <div className='text-center font-semibold'>
-                      <label className='flex h-32 items-center justify-center text-xl'>
+                      <label className='box-content flex h-32 items-center justify-center pt-4 text-xl'>
                         {tier}
                       </label>
                     </div>
@@ -351,7 +351,7 @@ export default function TierList({
                       >
                         {(provided) => (
                           <div
-                            className='flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 pt-4'
+                            className='box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 pt-4'
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
