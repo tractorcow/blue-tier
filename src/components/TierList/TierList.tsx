@@ -322,7 +322,7 @@ export default function TierList({
 
           {/* Tier Rows */}
           <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
-            <div className='grid grid-cols-[150px_1fr_1fr] gap-4 p-4'>
+            <div className='grid grid-cols-[0fr_1fr_1fr] gap-4 p-4'>
               {/*Header Row*/}
               <div />
               {SquadTypes.map((category) => (
@@ -338,7 +338,11 @@ export default function TierList({
               <DragDropContext onDragEnd={handleDragEnd}>
                 {AllTiers.map((tier) => (
                   <React.Fragment key={tier}>
-                    <div className='text-center font-semibold'>{tier}</div>
+                    <div className='text-center font-semibold'>
+                      <label className='flex h-32 items-center justify-center text-xl'>
+                        {tier}
+                      </label>
+                    </div>
                     {SquadTypes.map((category) => (
                       <Droppable
                         key={category.squadType}
@@ -347,7 +351,7 @@ export default function TierList({
                       >
                         {(provided) => (
                           <div
-                            className='flex flex-wrap content-start items-start justify-start gap-2'
+                            className='flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 pt-4'
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >
