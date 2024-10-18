@@ -41,28 +41,32 @@ export const reducer = (
         difficulty: 0,
         armor: 0,
       } // Reset difficulty and armor on boss change
-    case FilterActionTypes.SET_DIFFICULTY:
+    case FilterActionTypes.SET_DIFFICULTY: {
       // Reset armor on difficulty change, unless it's -1
       const armor = state.armor === -1 ? -1 : 0
       return { ...state, difficulty: action.payload as number, armor }
+    }
     case FilterActionTypes.SET_ARMOR:
       return { ...state, armor: action.payload as number } // Just set the new armor
-    case FilterActionTypes.SET_RANKING_TYPE:
-      if (action.payload === state.rankingType) {
-        return state // Don't update if it's the same
+    case FilterActionTypes.SET_RANKING_TYPE: {
+      const rankingType = action.payload as RankingType
+
+      // Don't update if it's the same ranking type
+      if (rankingType === state.rankingType) {
+        return state
       }
-      // If switching to global rankings, hide "All" difficulty and armor
-      if (action.payload === RankingType.Global) {
-        const difficulty = Math.max(state.difficulty, 0)
-        const armor = Math.max(state.armor, 0)
-        return {
-          ...state,
-          difficulty,
-          armor,
-          rankingType: action.payload as RankingType,
-        } // Just set the new ranking type
+
+      // Set default difficulty and armour for the new ranking type
+      const options =
+        rankingType === RankingType.Global
+          ? { difficulty: 0, armor: 0 }
+          : { difficulty: -1, armor: -1 }
+      return {
+        ...state,
+        ...options,
+        rankingType,
       }
-      return { ...state, rankingType: action.payload as RankingType } // Just set the new ranking type
+    }
     default:
       return state
   }

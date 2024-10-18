@@ -83,14 +83,14 @@ export default function TierList({
   const rankingType = state.rankingType
   const optionDifficulties = selectedRaid
     ? [
-        ...selectedRaid.OptionDifficulties,
         ...(rankingType === RankingType.User ? [AllType.All] : []),
+        ...selectedRaid.OptionDifficulties,
       ]
     : []
   const optionArmors = selectedRaid
     ? [
-        ...selectedRaid.OptionTypes,
         ...(rankingType === RankingType.User ? [AllType.All] : []),
+        ...selectedRaid.OptionTypes,
       ]
     : []
 
@@ -149,7 +149,7 @@ export default function TierList({
     const payload =
       difficultyLevel === AllType.All
         ? -1
-        : optionDifficulties.indexOf(difficultyLevel)
+        : selectedRaid?.OptionDifficulties.indexOf(difficultyLevel) || 0
     dispatch({
       type: FilterActionTypes.SET_DIFFICULTY,
       payload,
@@ -159,7 +159,9 @@ export default function TierList({
   // Change defence type
   const changeArmour = (armourIndex: AllArmorType) => {
     const payload =
-      armourIndex === AllType.All ? -1 : optionArmors.indexOf(armourIndex)
+      armourIndex === AllType.All
+        ? -1
+        : selectedRaid?.OptionTypes.indexOf(armourIndex) || 0
     dispatch({ type: FilterActionTypes.SET_ARMOR, payload })
   }
 
