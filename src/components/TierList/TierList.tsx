@@ -35,6 +35,7 @@ import { fetchRankings, saveRankings } from '@/lib/user'
 import TierFilters from '@/components/TierList/TierFilters'
 import ModeToggle from '@/components/TierList/ModeToggle'
 import LoadingOverlay from '@/components/TierList/Loading'
+import classnames from 'classnames'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -324,13 +325,13 @@ export default function TierList({
 
           {/* Tier Rows */}
           <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
-            <div className='grid grid-cols-[0fr_1fr_1fr] gap-4 p-4'>
+            <div className='grid grid-cols-[0fr_1fr_1fr] gap-x-4 p-4'>
               {/*Header Row*/}
-              <div />
+              <div className='p-2' />
               {SquadTypes.map((category) => (
                 <div
                   key={category.title}
-                  className='text-center text-lg font-bold'
+                  className='p-2 text-center text-lg font-bold'
                 >
                   {category.title}
                 </div>
@@ -340,8 +341,8 @@ export default function TierList({
               <DragDropContext onDragEnd={handleDragEnd}>
                 {AllTiers.map((tier) => (
                   <React.Fragment key={tier}>
-                    <div className='text-center font-semibold'>
-                      <label className='box-content flex h-32 items-center justify-center pt-4 text-xl'>
+                    <div className='p-2 text-center font-semibold'>
+                      <label className='box-content flex h-32 items-center justify-center text-xl'>
                         {tier}
                       </label>
                     </div>
@@ -351,9 +352,12 @@ export default function TierList({
                         droppableId={`${tier}-${category.squadType}`}
                         isDropDisabled={tier == UnrankedType.Unranked}
                       >
-                        {(provided) => (
+                        {(provided, state) => (
                           <div
-                            className='box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 pt-4'
+                            className={classnames(
+                              'box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 p-2',
+                              state.isDraggingOver ? 'bg-gray-700' : ''
+                            )}
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                           >

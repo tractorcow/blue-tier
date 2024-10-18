@@ -19,7 +19,7 @@ export const AllTiers: AllTier[] = [
 ]
 
 export const armorNames: Record<AllArmorType, string> = {
-  [AllType.All]: 'All Types',
+  [AllType.All]: 'All Armors',
   [ArmorType.Normal]: 'Normal',
   [ArmorType.LightArmor]: 'Light',
   [ArmorType.HeavyArmor]: 'Heavy',
