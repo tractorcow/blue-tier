@@ -3,7 +3,7 @@ import RaidCard from '@/components/Raids/RaidCard'
 import DifficultyButton from '@/components/TierList/DifficultyButton'
 import ArmorButton from '@/components/TierList/ArmorButton'
 import { RaidBase } from '@/lib/shaledb/types'
-import { AllArmorType, AllDifficulty } from '@/lib/ranking/types'
+import { AllArmorType, AllDifficulty, AllType } from '@/lib/ranking/types'
 import { Optional } from '@/lib/types'
 
 type TierFiltersProps = {
@@ -56,7 +56,10 @@ export default function TierFilters({
                   <DifficultyButton
                     key={difficulty}
                     difficulty={difficulty}
-                    selected={selectedDifficulty === difficulty}
+                    selected={
+                      selectedDifficulty === difficulty ||
+                      selectedDifficulty == AllType.All
+                    }
                     onClick={() => changeDifficulty(difficulty)}
                   />
                 )
@@ -72,7 +75,9 @@ export default function TierFilters({
                   <ArmorButton
                     key={armor}
                     armor={armor}
-                    selected={selectedArmor === armor}
+                    selected={
+                      selectedArmor === armor || selectedArmor == AllType.All
+                    }
                     onClick={() => changeArmour(armor)}
                   />
                 )
