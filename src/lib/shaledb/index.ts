@@ -55,18 +55,14 @@ const fetchData = async (): Promise<SchaleDBData> => {
   // Split up the raid data
   const raids: RaidBase[] = []
   for (const data of raidData['Raid']) {
-    // Kuro only has elastic
+    // Kuro has elastic instead of heavy armour
     const armorTypes =
       data['ArmorType'] == ArmorType.ElasticArmor
-        ? [ArmorType.ElasticArmor]
+        ? [ArmorType.ElasticArmor, ArmorType.LightArmor, ArmorType.Unarmed]
         : [ArmorType.LightArmor, ArmorType.HeavyArmor, ArmorType.Unarmed]
 
-    // Limit our focus to only insane and above difficulties
-    const maxDifficulty = Math.max(...data['MaxDifficulty'])
-    const difficulties =
-      maxDifficulty >= 6
-        ? [Difficulty.Insane, Difficulty.Torment]
-        : [Difficulty.Insane]
+    // Limit our focus to only extreme and insane
+    const difficulties = [Difficulty.Extreme, Difficulty.Insane]
 
     raids.push({
       RaidType: RaidType.Raid,
