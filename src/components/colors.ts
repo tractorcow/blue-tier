@@ -3,20 +3,20 @@ import { ArmorType } from '@prisma/client'
 import { AllArmorType, AllType } from '@/lib/ranking/types'
 
 export const bulletClasses: Record<BulletType, string> = {
-  [BulletType.Normal]: 'bg-normal',
-  [BulletType.Explosion]: 'bg-explosive',
-  [BulletType.Pierce]: 'bg-piercing',
-  [BulletType.Mystic]: 'bg-mystic',
-  [BulletType.Sonic]: 'bg-sonic',
+  [BulletType.Normal]: 'bg-normal-light dark:bg-normal',
+  [BulletType.Explosion]: 'bg-explosive-light dark:bg-explosive',
+  [BulletType.Pierce]: 'bg-piercing-light dark:bg-piercing',
+  [BulletType.Mystic]: 'bg-mystic-light dark:bg-mystic',
+  [BulletType.Sonic]: 'bg-sonic-light dark:bg-sonic',
 }
 
 export const armorClasses: Record<AllArmorType, string> = {
-  [ArmorType.Normal]: 'bg-normal',
-  [ArmorType.LightArmor]: 'bg-explosive',
-  [ArmorType.HeavyArmor]: 'bg-piercing',
-  [ArmorType.Unarmed]: 'bg-mystic',
-  [ArmorType.ElasticArmor]: 'bg-sonic',
-  [AllType.All]: 'bg-normal',
+  [ArmorType.Normal]: 'bg-normal-light dark:bg-normal',
+  [ArmorType.LightArmor]: 'bg-explosive-light dark:bg-explosive',
+  [ArmorType.HeavyArmor]: 'bg-piercing-light dark:bg-piercing',
+  [ArmorType.Unarmed]: 'bg-mystic-light dark:bg-mystic',
+  [ArmorType.ElasticArmor]: 'bg-sonic-light dark:bg-sonic',
+  [AllType.All]: 'bg-normal-light dark:bg-normal',
 }
 
 export const cardBulletClasses: Record<BulletType, string> = {

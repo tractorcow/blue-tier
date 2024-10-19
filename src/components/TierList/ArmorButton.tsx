@@ -12,11 +12,13 @@ type ArmorButtonProps = {
 const ArmorButton = ({ armor, onClick, selected }: ArmorButtonProps) => {
   const armorClass = armorClasses[armor]
   const armorLabel = armorNames[armor]
-  const selectedClass = selected ? 'border-gray-200' : 'border-transparent'
+  const selectedClass = selected
+    ? 'border-white text-white'
+    : 'border-transparent text-black'
   return (
     <button
       onClick={onClick}
-      className={`flex-grow rounded-lg border-2 p-2 text-center uppercase text-white hover:border-gray-200 ${selectedClass} ${armorClass}`}
+      className={`flex-grow rounded-lg border-2 p-2 text-center font-bold uppercase hover:border-white hover:text-white ${selectedClass} ${armorClass}`}
     >
       {armorLabel}
     </button>

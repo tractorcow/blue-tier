@@ -47,7 +47,7 @@ export default function TierFilters({
         />
       </div>
       <div className='lg:flex-grow'>
-        <div className='w-full space-y-2 bg-gray-900'>
+        <div className='w-full space-y-2'>
           {/* Difficulty Selector */}
           {difficulties && (
             <div className='flex gap-2'>

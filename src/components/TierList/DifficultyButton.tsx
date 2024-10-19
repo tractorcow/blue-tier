@@ -13,12 +13,14 @@ const DifficultyButton = ({
   onClick,
   selected,
 }: DifficultyButtonProps) => {
-  const selectedClass = selected ? 'border-gray-200' : 'border-transparent'
+  const selectedClass = selected
+    ? 'border-white text-white'
+    : 'border-transparent text-black'
   const difficultyLabel = difficultyNames[difficulty]
   return (
     <button
       onClick={onClick}
-      className={`flex-grow rounded-lg border-2 bg-gray-700 p-2 text-center uppercase text-white hover:bg-gray-600 ${selectedClass}`}
+      className={`flex-grow rounded-lg border-2 bg-gray-500 p-2 text-center font-bold uppercase text-white hover:border-white hover:text-white dark:bg-gray-600 ${selectedClass}`}
     >
       {difficultyLabel}
     </button>
