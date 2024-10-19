@@ -1,5 +1,4 @@
 import prisma from '@/lib/prisma'
-import { Tier } from '@prisma/client'
 import { RaidBase, Student } from '@/lib/shaledb/types'
 import {
   AllArmorType,
@@ -45,6 +44,23 @@ export const updateUserRankings = async (
 ) => {
   // For each ranking we must do an upsert
   for (const ranking of rankings) {
+    // For unranked, delete the ranking
+    if (ranking.tier === UnrankedType.Unranked) {
+      await prisma.ranking.delete({
+        where: {
+          raidId_armorType_difficulty_studentId_userId: {
+            raidId: ranking.raidId,
+            studentId: ranking.studentId,
+            difficulty: ranking.difficulty,
+            armorType: ranking.armorType,
+            userId: userId,
+          },
+        },
+      })
+      continue
+    }
+
+    // For other tiers, upsert the ranking
     await prisma.ranking.upsert({
       where: {
         raidId_armorType_difficulty_studentId_userId: {
@@ -196,7 +212,7 @@ export const calculateRankings = (
  */
 export const generateRankings = (
   studentId: number,
-  tier: Tier,
+  tier: AllTier,
   selectedRaid: RaidBase,
   selectedDifficulty: AllDifficulty,
   selectedArmor: AllArmorType

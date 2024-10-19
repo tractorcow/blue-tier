@@ -23,7 +23,6 @@ import {
   AllType,
   Ranking,
   RankingType,
-  UnrankedType,
 } from '@/lib/ranking/types'
 import {
   calculateRankings,
@@ -230,11 +229,6 @@ export default function TierList({
     const tier = result.destination.droppableId.split('-')?.[0] as AllTier
     const studentId = parseInt(result.draggableId)
 
-    if (tier === UnrankedType.Unranked) {
-      resolveError('Un-ranking students is not supported')
-      return
-    }
-
     // Validate we have all the details for this ranking
     if (
       !tier ||
@@ -350,7 +344,6 @@ export default function TierList({
                       <Droppable
                         key={category.squadType}
                         droppableId={`${tier}-${category.squadType}`}
-                        isDropDisabled={tier == UnrankedType.Unranked}
                       >
                         {(provided, state) => (
                           <div

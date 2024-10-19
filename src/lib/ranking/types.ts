@@ -8,8 +8,10 @@ import {
 // It's necessary to strip some DB fields when mutating this locally
 export type Ranking = Omit<
   DBRanking,
-  'id' | 'createdAt' | 'updatedAt' | 'userId'
->
+  'id' | 'createdAt' | 'updatedAt' | 'userId' | 'tier'
+> & {
+  tier: AllTier
+}
 
 // just the unique identifiable fields from ranking
 export type RankingId = Omit<Ranking, 'tier'>
