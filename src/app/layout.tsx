@@ -2,9 +2,10 @@ import type { Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import { ReactNode } from 'react'
 import localFont from 'next/font/local'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import authOptions from '@/lib/authoptions'
-import './globals.css'
 import AuthProvider from '@/context/Auth.context'
+import './globals.css'
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',

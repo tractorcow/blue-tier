@@ -5,11 +5,19 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Dark mode */
   --color-normal: rgb(72, 85, 130);
   --color-explosive: rgb(167, 12, 25);
   --color-piercing: rgb(178, 109, 31);
   --color-mystic: rgb(33, 111, 156);
   --color-sonic: rgb(148, 49, 165);
+
+  /* Light mode */
+  --color-normal-light: rgb(130, 142, 180);
+  --color-explosive-light: rgb(217, 72, 85);
+  --color-piercing-light: rgb(228, 159, 81);
+  --color-mystic-light: rgb(83, 161, 206);
+  --color-sonic-light: rgb(198, 99, 215);
 }
 
 @media (prefers-color-scheme: dark) {

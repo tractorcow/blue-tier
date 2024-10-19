@@ -289,7 +289,7 @@ export default function TierList({
         </div>
       </div>
 
-      <div className='space-y-4 px-4 py-6 dark:bg-gray-900'>
+      <div className='space-y-4 bg-gray-400 px-4 py-6 dark:bg-gray-900'>
         <TierFilters
           raids={raids}
           selectedRaid={selectedRaid}
@@ -305,20 +305,23 @@ export default function TierList({
         {/* Main Area */}
         <div className='flex flex-col space-y-4'>
           {/* Global Rankings Toggle */}
-          <div className='text-right'>
+          <div className='relative text-right'>
             <input
               type='text'
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
               placeholder='Filter students by name'
-              className='w-full rounded-lg border-0 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500'
+              className='w-full rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 pl-10 placeholder-gray-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white dark:bg-gray-700 dark:placeholder-gray-400'
             />
+            <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+              <i className='fas fa-search text-gray-500 dark:text-gray-400'></i>
+            </div>
           </div>
 
           {loading && <LoadingOverlay />}
 
           {/* Tier Rows */}
-          <div className='rounded-lg bg-white p-4 shadow-md dark:bg-gray-800'>
+          <div className='rounded-lg bg-gray-100 p-4 shadow-md dark:bg-gray-800'>
             <div className='grid grid-cols-[0fr_1fr_1fr] gap-x-4 p-4'>
               {/*Header Row*/}
               <div className='p-2' />
@@ -349,7 +352,9 @@ export default function TierList({
                           <div
                             className={classnames(
                               'box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 p-2',
-                              state.isDraggingOver ? 'bg-gray-700' : ''
+                              state.isDraggingOver
+                                ? 'bg-gray-400 dark:bg-gray-700'
+                                : ''
                             )}
                             ref={provided.innerRef}
                             {...provided.droppableProps}

@@ -15,7 +15,7 @@ export default function AuthComponent() {
     <div>
       {session && session.user ? (
         <div className='flex items-center space-x-4'>
-          <span className='text-white'>Hello, {session.user.name}</span>
+          <span>Hello, {session.user.name}</span>
           <button
             className='rounded-md bg-red-500 px-4 py-2 text-white transition hover:bg-red-600'
             onClick={() => signOut()}

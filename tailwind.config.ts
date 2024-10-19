@@ -12,11 +12,30 @@ const config: Config = {
         background: 'var(--background)',
         foreground: 'var(--foreground)',
         // Blue archive attack / defense colours
-        normal: 'var(--color-normal)',
-        explosive: 'var(--color-explosive)',
-        piercing: 'var(--color-piercing)',
-        mystic: 'var(--color-mystic)',
-        sonic: 'var(--color-sonic)',
+        normal: {
+          dark: 'var(--color-normal)',
+          light: 'var(--color-normal-light)',
+        },
+        explosive: {
+          DEFAULT: 'var(--color-explosive)',
+          dark: 'var(--color-explosive)',
+          light: 'var(--color-explosive-light)',
+        },
+        piercing: {
+          DEFAULT: 'var(--color-piercing)',
+          dark: 'var(--color-piercing)',
+          light: 'var(--color-piercing-light)',
+        },
+        mystic: {
+          DEFAULT: 'var(--color-mystic)',
+          dark: 'var(--color-mystic)',
+          light: 'var(--color-mystic-light)',
+        },
+        sonic: {
+          DEFAULT: 'var(--color-sonic)',
+          dark: 'var(--color-sonic)',
+          light: 'var(--color-sonic-light)',
+        },
       },
     },
   },
