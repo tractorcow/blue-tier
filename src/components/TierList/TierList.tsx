@@ -39,6 +39,7 @@ import classnames from 'classnames'
 type TierListProps = {
   schaleData: SchaleDBData
   globalRankings: Ranking[]
+  namedRankings?: string
 }
 
 const getStyle = (
@@ -62,6 +63,7 @@ const getStyle = (
 export default function TierList({
   schaleData,
   globalRankings,
+  namedRankings,
 }: TierListProps) {
   const { raids, students } = schaleData
   const { data: session } = useSession()
@@ -267,11 +269,19 @@ export default function TierList({
     selectedArmor
   )
 
+  const subtitle =
+    (rankingType === RankingType.User && 'Editing your rankings') ||
+    (namedRankings && `Rankings shared by ${namedRankings}`) ||
+    'Global Rankings'
+
   return (
     <div className='container mx-auto'>
       {/* Header Section */}
       <div className='flex flex-row justify-between py-4'>
-        <h1 className='text-xl font-bold'>Blue Archive Tier List</h1>
+        <div>
+          <h1 className='text-xl font-bold'>Blue Archive Tier List</h1>
+          <h2 className='text-lg font-semibold'>{subtitle}</h2>
+        </div>
         <div className='ml-auto flex items-center space-x-4'>
           {session && (
             <ModeToggle

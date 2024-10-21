@@ -1,3 +1,4 @@
+import { revalidateTag, unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { RaidBase, Student } from '@/lib/shaledb/types'
 import {
@@ -10,38 +11,75 @@ import {
 } from '@/lib/ranking/types'
 import { AllTiers } from '@/lib/ranking/lists'
 
-// Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
-export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
-    FROM "rankings"
-    GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
-  `
+export const userNameTag = (userId: string) => `user-name-${userId}`
+
+// Get user name by id
+export const getUserName = async (userId: string): Promise<string> => {
+  return unstable_cache(
+    async () => {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      })
+      return user?.name || ''
+    },
+    [userNameTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userNameTag(userId)],
+    }
+  )()
 }
+
+// Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
+export const fetchGlobalRankings = unstable_cache(
+  async (): Promise<Ranking[]> => {
+    return prisma.$queryRaw<Ranking[]>`
+      SELECT
+        "raid_id" AS "raidId",
+        "armor_type" AS "armorType",
+        "difficulty",
+        "student_id" AS "studentId",
+        MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
+      FROM "rankings"
+      GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
+    `
+  },
+  ['global-rankings'],
+  { revalidate: 3600, tags: ['global-rankings'] }
+)
+
+export const userRankTag = (userId: string) => `user-rankings-${userId}`
 
 // Function to fetch grouped tier data for a specific userId
 export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      "tier"
-    FROM "rankings"
-    WHERE "user_id" = ${userId}
-  `
+  return unstable_cache(
+    async () =>
+      prisma.$queryRaw<Ranking[]>`
+          SELECT
+            "raid_id" AS "raidId",
+            "armor_type" AS "armorType",
+            "difficulty",
+            "student_id" AS "studentId",
+            "tier"
+          FROM "rankings"
+          WHERE "user_id" = ${userId}`,
+    [userRankTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userRankTag(userId)],
+    }
+  )()
 }
 
 export const updateUserRankings = async (
   userId: string,
   rankings: Ranking[]
 ) => {
+  // Flush cache for this user
+  revalidateTag(userRankTag(userId))
+
   // For each ranking we must do an upsert
   for (const ranking of rankings) {
     // For unranked, delete the ranking
