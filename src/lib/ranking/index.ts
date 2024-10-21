@@ -1,3 +1,4 @@
+import { revalidateTag, unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { RaidBase, Student } from '@/lib/shaledb/types'
 import {
@@ -11,37 +12,51 @@ import {
 import { AllTiers } from '@/lib/ranking/lists'
 
 // Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
-export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
-    FROM "rankings"
-    GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
-  `
-}
+export const fetchGlobalRankings = unstable_cache(
+  async (): Promise<Ranking[]> => {
+    return prisma.$queryRaw<Ranking[]>`
+      SELECT
+        "raid_id" AS "raidId",
+        "armor_type" AS "armorType",
+        "difficulty",
+        "student_id" AS "studentId",
+        MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
+      FROM "rankings"
+      GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
+    `
+  },
+  ['global-rankings'],
+  { revalidate: 3600, tags: ['global-rankings'] }
+)
+
+export const userRankTag = (userId: string) => `user-rankings-${userId}`
 
 // Function to fetch grouped tier data for a specific userId
 export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      "tier"
-    FROM "rankings"
-    WHERE "user_id" = ${userId}
-  `
+  const callback = async (): Promise<Ranking[]> =>
+    prisma.$queryRaw<Ranking[]>`
+          SELECT
+            "raid_id" AS "raidId",
+            "armor_type" AS "armorType",
+            "difficulty",
+            "student_id" AS "studentId",
+            "tier"
+          FROM "rankings"
+          WHERE "user_id" = ${userId}`
+
+  return await unstable_cache(callback, [userRankTag(userId)], {
+    revalidate: 3600,
+    tags: [userRankTag(userId)],
+  })()
 }
 
 export const updateUserRankings = async (
   userId: string,
   rankings: Ranking[]
 ) => {
+  // Flush cache for this user
+  revalidateTag(userRankTag(userId))
+
   // For each ranking we must do an upsert
   for (const ranking of rankings) {
     // For unranked, delete the ranking
