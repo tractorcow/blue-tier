@@ -11,6 +11,27 @@ import {
 } from '@/lib/ranking/types'
 import { AllTiers } from '@/lib/ranking/lists'
 
+export const userNameTag = (userId: string) => `user-name-${userId}`
+
+// Get user name by id
+export const getUserName = async (userId: string): Promise<string> => {
+  return unstable_cache(
+    async () => {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      })
+      return user?.name || ''
+    },
+    [userNameTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userNameTag(userId)],
+    }
+  )()
+}
+
 // Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
 export const fetchGlobalRankings = unstable_cache(
   async (): Promise<Ranking[]> => {
@@ -33,8 +54,9 @@ export const userRankTag = (userId: string) => `user-rankings-${userId}`
 
 // Function to fetch grouped tier data for a specific userId
 export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
-  const callback = async (): Promise<Ranking[]> =>
-    prisma.$queryRaw<Ranking[]>`
+  return unstable_cache(
+    async () =>
+      prisma.$queryRaw<Ranking[]>`
           SELECT
             "raid_id" AS "raidId",
             "armor_type" AS "armorType",
@@ -42,12 +64,13 @@ export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
             "student_id" AS "studentId",
             "tier"
           FROM "rankings"
-          WHERE "user_id" = ${userId}`
-
-  return await unstable_cache(callback, [userRankTag(userId)], {
-    revalidate: 3600,
-    tags: [userRankTag(userId)],
-  })()
+          WHERE "user_id" = ${userId}`,
+    [userRankTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userRankTag(userId)],
+    }
+  )()
 }
 
 export const updateUserRankings = async (
