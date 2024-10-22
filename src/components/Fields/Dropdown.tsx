@@ -12,6 +12,7 @@ type DropdownProps<T> = {
   options: DropdownOption<T>[]
   value: T | null
   onChange: (value: T | null) => void
+  placeholder?: string
   noneLabel?: string
   canDeselect?: boolean
   className?: string
@@ -22,6 +23,7 @@ export const Dropdown = <T,>({
   options,
   value,
   onChange,
+  placeholder,
   noneLabel,
   canDeselect,
   className,
@@ -90,7 +92,7 @@ export const Dropdown = <T,>({
               {selectedOption.label}
             </div>
           ) : (
-            noneLabel || 'Select an option'
+            placeholder || noneLabel || 'Select an option'
           )}
 
           {/* Conditionally render either the Chevron or the 'X' icon */}
