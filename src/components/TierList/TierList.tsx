@@ -14,7 +14,11 @@ import type { SchaleDBData, Student } from '@/lib/shaledb/types'
 import { AllTiers, SquadTypes } from '@/lib/ranking/lists'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
-import { FilterActionTypes, initialState, reducer } from '@/state/FilterState'
+import {
+  FilterActionTypes,
+  initialFilterState,
+  filterReducer,
+} from '@/state/FilterState'
 import AuthComponent from '@/components/Auth/AuthComponent'
 import {
   AllArmorType,
@@ -26,7 +30,7 @@ import {
 } from '@/lib/ranking/types'
 import {
   calculateRankings,
-  filterStudentsByName,
+  filterStudents,
   generateRankings,
 } from '@/lib/ranking'
 import useAsyncQueue from '@/state/AsyncQueue'
@@ -35,6 +39,15 @@ import TierFilters from '@/components/TierList/TierFilters'
 import ModeToggle from '@/components/TierList/ModeToggle'
 import LoadingOverlay from '@/components/TierList/Loading'
 import classnames from 'classnames'
+import {
+  armorEfficiencies,
+  bulletEFficiencies,
+  Efficiency,
+  initialSearchState,
+  SearchActionTypes,
+  searchReducer,
+} from '@/state/SearchState'
+import { Dropdown } from '@/components/Fields/Dropdown'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -69,20 +82,27 @@ export default function TierList({
   const { data: session } = useSession()
 
   // Use useReducer for state management
-  const [state, dispatch] = useReducer(reducer, {
-    ...initialState,
+  const [filterState, dispatchFilter] = useReducer(filterReducer, {
+    ...initialFilterState,
     raid: raids[0]?.Id,
   })
 
+  const [searchState, dispatchSearch] = useReducer(
+    searchReducer,
+    initialSearchState
+  )
+
   // Get details of the current raid, armour, difficulty
-  const selectedRaid = raids.find((raid) => raid.Id === state.raid)
+  const selectedRaid = raids.find((raid) => raid.Id === filterState.raid)
   const selectedArmor =
-    state.armor < 0 ? AllType.All : selectedRaid?.OptionTypes[state.armor]
-  const selectedDifficulty =
-    state.difficulty < 0
+    filterState.armor < 0
       ? AllType.All
-      : selectedRaid?.OptionDifficulties[state.difficulty]
-  const rankingType = state.rankingType
+      : selectedRaid?.OptionTypes[filterState.armor]
+  const selectedDifficulty =
+    filterState.difficulty < 0
+      ? AllType.All
+      : selectedRaid?.OptionDifficulties[filterState.difficulty]
+  const rankingType = filterState.rankingType
   const optionDifficulties = selectedRaid
     ? [
         ...(rankingType === RankingType.User ? [AllType.All] : []),
@@ -95,9 +115,6 @@ export default function TierList({
         ...selectedRaid.OptionTypes,
       ]
     : []
-
-  // State for name filter
-  const [nameFilter, setNameFilter] = useState<string>('')
 
   // Local storage for user rankings
   const [userRankings, setUserRankings] = useState<Ranking[] | undefined>(
@@ -143,7 +160,7 @@ export default function TierList({
 
   // Selecting another boss
   const changeBoss = (payload: number) => {
-    dispatch({ type: FilterActionTypes.SET_RAID, payload: payload })
+    dispatchFilter({ type: FilterActionTypes.SET_RAID, payload: payload })
   }
 
   // Change the difficulty level
@@ -152,7 +169,7 @@ export default function TierList({
       difficultyLevel === AllType.All
         ? -1
         : selectedRaid?.OptionDifficulties.indexOf(difficultyLevel) || 0
-    dispatch({
+    dispatchFilter({
       type: FilterActionTypes.SET_DIFFICULTY,
       payload,
     })
@@ -164,12 +181,33 @@ export default function TierList({
       armourIndex === AllType.All
         ? -1
         : selectedRaid?.OptionTypes.indexOf(armourIndex) || 0
-    dispatch({ type: FilterActionTypes.SET_ARMOR, payload })
+    dispatchFilter({ type: FilterActionTypes.SET_ARMOR, payload })
   }
 
   // Change ranking type
   const setRankingType = (rankingType: RankingType) => {
-    dispatch({ type: FilterActionTypes.SET_RANKING_TYPE, payload: rankingType })
+    dispatchFilter({
+      type: FilterActionTypes.SET_RANKING_TYPE,
+      payload: rankingType,
+    })
+  }
+
+  const setNameFilter = (name: string) => {
+    dispatchSearch({ type: SearchActionTypes.SET_SEARCH_QUERY, payload: name })
+  }
+
+  const setBulletEfficiency = (efficiency: Efficiency | null) => {
+    dispatchSearch({
+      type: SearchActionTypes.SET_BULLET_EFFICIENCY,
+      payload: efficiency,
+    })
+  }
+
+  const setArmorEfficiency = (efficiency: Efficiency | null) => {
+    dispatchSearch({
+      type: SearchActionTypes.SET_ARMOR_EFFICIENCY,
+      payload: efficiency,
+    })
   }
 
   // Setup queue for saving rankings to the database
@@ -258,8 +296,14 @@ export default function TierList({
   const sourceRankings =
     rankingType === RankingType.Global ? globalRankings : userRankings || []
 
-  // Filter students
-  const filteredStudents = filterStudentsByName(students, nameFilter)
+  // Filter students by search state
+  const filteredStudents = filterStudents(
+    students,
+    searchState,
+    selectedRaid,
+    selectedDifficulty,
+    selectedArmor
+  )
 
   const rankings = calculateRankings(
     filteredStudents,
@@ -315,16 +359,48 @@ export default function TierList({
         {/* Main Area */}
         <div className='flex flex-col space-y-4'>
           {/* Global Rankings Toggle */}
-          <div className='relative text-right'>
-            <input
-              type='text'
-              value={nameFilter}
-              onChange={(e) => setNameFilter(e.target.value)}
-              placeholder='Filter students by name'
-              className='w-full rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 pl-10 placeholder-gray-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white dark:bg-gray-700 dark:placeholder-gray-400'
-            />
-            <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-              <i className='fas fa-search text-gray-500 dark:text-gray-400'></i>
+          <div className='flex flex-col justify-between space-y-2 md:flex-row md:space-x-2 md:space-y-0'>
+            <div className='relative flex-grow text-right'>
+              <input
+                type='text'
+                value={searchState.searchQuery}
+                onChange={(e) => setNameFilter(e.target.value)}
+                placeholder='Filter students by name'
+                className='w-full rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 pl-10 placeholder-gray-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white dark:bg-gray-700 dark:placeholder-gray-400'
+              />
+              <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+                <i className='fas fa-search text-gray-500 dark:text-gray-400'></i>
+              </div>
+            </div>
+            <div className='flex-grow'>
+              <Dropdown
+                options={Object.keys(bulletEFficiencies).map((key) => ({
+                  value: key as Efficiency,
+                  label: bulletEFficiencies[key as Efficiency],
+                }))}
+                value={searchState.bulletEfficiency}
+                onChange={setBulletEfficiency}
+                canDeselect={true}
+                placeholder='Filter bullet effectiveness'
+                noneLabel='Any bullet'
+                className='rounded-lg border-[1px] border-black bg-gray-600 px-4 py-2 dark:border-white'
+                menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
+              />
+            </div>
+            <div className='flex-grow'>
+              <Dropdown
+                options={Object.keys(armorEfficiencies).map((key) => ({
+                  value: key as Efficiency,
+                  label: armorEfficiencies[key as Efficiency],
+                }))}
+                value={searchState.armorEfficiency}
+                onChange={setArmorEfficiency}
+                canDeselect={true}
+                placeholder='Filter armor resistance'
+                noneLabel='Any armor'
+                className='rounded-lg border-[1px] border-black bg-gray-600 px-4 py-2 dark:border-white'
+                menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
+              />
             </div>
           </div>
 
