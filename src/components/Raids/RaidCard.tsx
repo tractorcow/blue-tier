@@ -7,6 +7,7 @@ import { attackIcon, defenseIcon } from '@/lib/shaledb'
 import Image from 'next/image'
 import { armorClasses, bulletClasses } from '@/components/colors'
 import { armorNames, bulletNames } from '@/lib/ranking/lists'
+import { Dropdown } from '@/components/Fields/Dropdown'
 
 type RaidCardProps = {
   raids: RaidBase[]
@@ -38,7 +39,7 @@ const RaidCard = ({
     : null
   return (
     <div
-      className='relative flex h-full flex-col justify-between overflow-hidden rounded-lg bg-gray-300 bg-right p-6 py-8 dark:bg-gray-800'
+      className='relative flex h-full flex-col justify-between rounded-lg bg-gray-300 bg-right p-6 dark:bg-gray-800'
       style={{
         backgroundImage: iconImage ? `url(${iconImage})` : undefined,
         backgroundPosition: 'right',
@@ -46,19 +47,19 @@ const RaidCard = ({
         backgroundRepeat: 'no-repeat',
       }}
     >
-      <select
-        id='raid-select'
-        onChange={(e) => changeRaid(parseInt(e.target.value))}
-        value={raid?.Id || 0}
-        className='w-3/4 rounded-xl border-[1px] border-gray-400 bg-gray-600 bg-opacity-20 p-2 text-2xl font-bold text-gray-700 dark:text-gray-200'
-      >
-        <option value={0}>Select Raid</option>
-        {raids.map((raid) => (
-          <option key={raid.Id} value={raid.Id}>
-            {raid.Name}
-          </option>
-        ))}
-      </select>
+      <div className='w-3/4'>
+        <Dropdown
+          options={raids.map((r) => ({
+            value: r.Id,
+            label: r.Name,
+          }))}
+          value={raid?.Id ?? null}
+          onChange={(value) => changeRaid(value || 0)}
+          noneLabel={'Select Raid'}
+          className='rounded-xl border-[1px] border-gray-400 bg-gray-600 bg-opacity-20 p-2 text-2xl font-bold text-gray-700 dark:text-gray-200'
+          menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
+        />
+      </div>
       {bulletBg && armorBg && bulletName && armorName && (
         <div className='absolute right-1 top-1 flex flex-row space-x-2'>
           <div className={`w-5 rounded-full p-1 ${bulletBg}`}>
