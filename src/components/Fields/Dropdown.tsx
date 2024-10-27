@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import classnames from 'classnames'
+import ClickOutside from '@/components/ClickOutside/ClickOutside'
 
 type DropdownOption<T> = {
   value: T
@@ -30,7 +31,6 @@ export const Dropdown = <T,>({
   menuClassName,
 }: DropdownProps<T>) => {
   const [open, setOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // Handle option selection
   const handleSelect = (selectedValue: T | null) => {
@@ -46,25 +46,11 @@ export const Dropdown = <T,>({
 
   const selectedOption = options.find((option) => option.value === value)
 
-  // Handle clicks outside of the dropdown to close it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [dropdownRef])
-
   return (
-    <div ref={dropdownRef} className='relative inline-block w-full text-left'>
+    <ClickOutside
+      className='relative inline-block w-full text-left'
+      onClickOutside={() => setOpen(false)}
+    >
       <div className='group'>
         <button
           onClick={() => setOpen((prev) => !prev)} // Toggle dropdown open state
@@ -150,6 +136,6 @@ export const Dropdown = <T,>({
           </div>
         )}
       </div>
-    </div>
+    </ClickOutside>
   )
 }

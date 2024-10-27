@@ -1,5 +1,6 @@
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
+import ClickOutside from '@/components/ClickOutside/ClickOutside'
 
 type SharingWindowProps = {
   onClose: () => void
@@ -29,7 +30,10 @@ export default function SharingWindow({ onClose }: SharingWindowProps) {
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50'>
-      <div className='relative w-96 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800'>
+      <ClickOutside
+        className='relative w-96 rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800'
+        onClickOutside={onClose}
+      >
         <h2 className='text-xl font-semibold text-gray-800 dark:text-gray-200'>
           Share your rankings
         </h2>
@@ -62,7 +66,7 @@ export default function SharingWindow({ onClose }: SharingWindowProps) {
         >
           ✖
         </button>
-      </div>
+      </ClickOutside>
     </div>
   )
 }
