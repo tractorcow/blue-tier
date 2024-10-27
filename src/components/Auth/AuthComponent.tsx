@@ -3,13 +3,13 @@
 import { signIn, signOut, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import discordIcon from './discord-mark-white.png'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import SharingWindow from '@/components/Social/SharingWindow'
+import ClickOutside from '@/components/ClickOutside/ClickOutside'
 
 export default function AuthComponent() {
   const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Toggle dropdown when button is clicked
@@ -17,26 +17,13 @@ export default function AuthComponent() {
     setIsOpen((isOpen) => !isOpen)
   }
 
-  // Close dropdown when clicking outside of it
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [])
-
   return (
     <div>
       {session && session.user ? (
-        <div className='relative' ref={dropdownRef}>
+        <ClickOutside
+          onClickOutside={() => setIsOpen(false)}
+          className='relative'
+        >
           <button
             onClick={toggleDropdown}
             className='flex items-center space-x-2 rounded-md bg-green-500 px-4 py-2 text-black transition hover:bg-green-600 dark:bg-green-700 dark:text-white dark:hover:bg-green-800'
@@ -77,10 +64,10 @@ export default function AuthComponent() {
               {/*</button>*/}
             </div>
           )}
-        </div>
+        </ClickOutside>
       ) : (
         <button
-          className='flex items-center rounded-md bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600'
+          className='flex items-center gap-2 rounded-md bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600'
           onClick={() => signIn('discord')}
         >
           <Image src={discordIcon} alt='Discord Icon' width={24} height={24} />

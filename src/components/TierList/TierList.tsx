@@ -16,10 +16,9 @@ import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import {
   FilterActionTypes,
-  initialFilterState,
   filterReducer,
+  initialFilterState,
 } from '@/state/FilterState'
-import AuthComponent from '@/components/Auth/AuthComponent'
 import {
   AllArmorType,
   AllDifficulty,
@@ -36,7 +35,6 @@ import {
 import useAsyncQueue from '@/state/AsyncQueue'
 import { fetchRankings, saveRankings } from '@/lib/user'
 import TierFilters from '@/components/TierList/TierFilters'
-import ModeToggle from '@/components/TierList/ModeToggle'
 import LoadingOverlay from '@/components/TierList/Loading'
 import classnames from 'classnames'
 import {
@@ -48,6 +46,8 @@ import {
   searchReducer,
 } from '@/state/SearchState'
 import { Dropdown } from '@/components/Fields/Dropdown'
+import Header from '@/components/Header/Header'
+import Footer from '@/components/Footer/Footer'
 
 type TierListProps = {
   schaleData: SchaleDBData
@@ -320,28 +320,11 @@ export default function TierList({
 
   return (
     <div className='container mx-auto'>
-      {/* Header Section */}
-      <div className='flex flex-row justify-between py-4'>
-        <div>
-          <h1 className='text-xl font-bold'>Blue Archive Tier List</h1>
-          <h2 className='text-lg font-semibold'>{subtitle}</h2>
-        </div>
-        <div className='ml-auto flex items-center space-x-4'>
-          {session && (
-            <ModeToggle
-              onChange={(e) => {
-                setRankingType(
-                  e.target.checked ? RankingType.User : RankingType.Global
-                )
-              }}
-              selected={rankingType == RankingType.User}
-            >
-              Edit My Rankings
-            </ModeToggle>
-          )}
-          <AuthComponent />
-        </div>
-      </div>
+      <Header
+        rankingType={rankingType}
+        setRankingType={setRankingType}
+        subtitle={subtitle}
+      />
 
       <div className='space-y-4 bg-gray-400 px-4 py-6 dark:bg-gray-900'>
         <TierFilters
@@ -487,6 +470,7 @@ export default function TierList({
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
