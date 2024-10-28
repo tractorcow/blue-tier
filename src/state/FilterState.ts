@@ -8,7 +8,7 @@ export type FilterState = {
 }
 
 // Define the initial state
-export const initialState: FilterState = {
+export const initialFilterState: FilterState = {
   raid: 0, // Current raid index (integer)
   difficulty: 0, // Current difficulty level (integer). -1 means "all"
   armor: 0, // Current armor type (integer). -1 means "all"
@@ -29,7 +29,7 @@ export type FilterAction = {
 }
 
 // Reducer function to manage state changes
-export const reducer = (
+export const filterReducer = (
   state: FilterState,
   action: FilterAction
 ): FilterState => {

@@ -7,6 +7,9 @@ const nextConfig = {
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_DISCORD_URL: 'https://discord.gg/5rAUt8X4pj',
+  },
 }
 
 export default nextConfig

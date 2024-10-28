@@ -1,5 +1,6 @@
+import { revalidateTag, unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
-import { RaidBase, Student } from '@/lib/shaledb/types'
+import { BulletType, RaidBase, Student } from '@/lib/shaledb/types'
 import {
   AllArmorType,
   AllDifficulty,
@@ -9,39 +10,79 @@ import {
   UnrankedType,
 } from '@/lib/ranking/types'
 import { AllTiers } from '@/lib/ranking/lists'
+import { Efficiency, SearchState } from '@/state/SearchState'
+import { determineBulletType } from '@/lib/raids'
+import { ArmorType } from '@prisma/client'
+
+export const userNameTag = (userId: string) => `user-name-${userId}`
+
+// Get user name by id
+export const getUserName = async (userId: string): Promise<string> => {
+  return unstable_cache(
+    async () => {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+      })
+      return user?.name || ''
+    },
+    [userNameTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userNameTag(userId)],
+    }
+  )()
+}
 
 // Function to fetch tier data grouped by raidId, armorType, difficulty, and studentId
-export const fetchGlobalRankings = async (): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
-    FROM "rankings"
-    GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
-  `
-}
+export const fetchGlobalRankings = unstable_cache(
+  async (): Promise<Ranking[]> => {
+    return prisma.$queryRaw<Ranking[]>`
+      SELECT
+        "raid_id" AS "raidId",
+        "armor_type" AS "armorType",
+        "difficulty",
+        "student_id" AS "studentId",
+        MODE() WITHIN GROUP (ORDER BY "tier") AS "tier"
+      FROM "rankings"
+      GROUP BY "raid_id", "armor_type", "difficulty", "student_id"
+    `
+  },
+  ['global-rankings'],
+  { revalidate: 3600, tags: ['global-rankings'] }
+)
+
+export const userRankTag = (userId: string) => `user-rankings-${userId}`
 
 // Function to fetch grouped tier data for a specific userId
 export const fetchDataForUser = async (userId: string): Promise<Ranking[]> => {
-  return prisma.$queryRaw<Ranking[]>`
-    SELECT
-      "raid_id" AS "raidId",
-      "armor_type" AS "armorType",
-      "difficulty",
-      "student_id" AS "studentId",
-      "tier"
-    FROM "rankings"
-    WHERE "user_id" = ${userId}
-  `
+  return unstable_cache(
+    async () =>
+      prisma.$queryRaw<Ranking[]>`
+          SELECT
+            "raid_id" AS "raidId",
+            "armor_type" AS "armorType",
+            "difficulty",
+            "student_id" AS "studentId",
+            "tier"
+          FROM "rankings"
+          WHERE "user_id" = ${userId}`,
+    [userRankTag(userId)],
+    {
+      revalidate: 3600,
+      tags: [userRankTag(userId)],
+    }
+  )()
 }
 
 export const updateUserRankings = async (
   userId: string,
   rankings: Ranking[]
 ) => {
+  // Flush cache for this user
+  revalidateTag(userRankTag(userId))
+
   // For each ranking we must do an upsert
   for (const ranking of rankings) {
     // For unranked, delete the ranking
@@ -264,6 +305,65 @@ export const generateRankings = (
 }
 
 /**
+ * Compare bullet to armour.
+ * If positive, the bullet will do extra damage.
+ * If negative, the bullet does inefficient damage
+ * @param bullet
+ * @param armor
+ */
+const compareBulletArmour = (bullet: BulletType, armor: ArmorType): number => {
+  // Normal is 0 all around
+  if (bullet == BulletType.Normal || armor == ArmorType.Normal) {
+    return 0
+  }
+
+  switch (bullet) {
+    // Piercing
+    case BulletType.Pierce:
+      switch (armor) {
+        case ArmorType.HeavyArmor:
+          return 1
+        case ArmorType.LightArmor:
+          return -1
+        default:
+          return 0
+      }
+    // Explosive
+    case BulletType.Explosion:
+      switch (armor) {
+        case ArmorType.LightArmor:
+          return 1
+        case ArmorType.Unarmed:
+        case ArmorType.ElasticArmor:
+          return -1
+        default:
+          return 0
+      }
+    // Mystic
+    case BulletType.Mystic:
+      switch (armor) {
+        case ArmorType.Unarmed:
+          return 1
+        case ArmorType.HeavyArmor:
+          return -1
+        default:
+          return 0
+      }
+    // Sonic
+    case BulletType.Sonic:
+      switch (armor) {
+        case ArmorType.ElasticArmor:
+        case ArmorType.Unarmed:
+          return 1
+        case ArmorType.HeavyArmor:
+          return -1
+        default:
+          return 0
+      }
+  }
+}
+
+/**
  * Filter students by name
  * @param students
  * @param nameFilter
@@ -275,4 +375,43 @@ export const filterStudentsByName = (
   return students.filter((student) =>
     student.Name.toLowerCase().includes(nameFilter.toLowerCase())
   )
+}
+
+export const filterStudents = (
+  students: Student[],
+  searchState: SearchState,
+  raid: RaidBase | undefined,
+  difficulty: AllDifficulty | undefined,
+  armor: AllArmorType | undefined
+): Student[] => {
+  let result = students
+
+  // Filter students by name
+  if (searchState.searchQuery) {
+    result = students.filter((student) =>
+      student.Name.toLowerCase().includes(searchState.searchQuery.toLowerCase())
+    )
+  }
+
+  // Filter by student armor
+  if (raid && difficulty && searchState.armorEfficiency) {
+    const bulletType = determineBulletType(raid, difficulty)
+    const threshold = searchState.armorEfficiency === Efficiency.Strong ? -1 : 0
+    if (bulletType) {
+      result = result.filter(
+        (student) =>
+          compareBulletArmour(bulletType, student.ArmorType) <= threshold
+      )
+    }
+  }
+
+  // Filter by student bullet
+  if (raid && searchState.bulletEfficiency && armor && armor !== AllType.All) {
+    const threshold = searchState.bulletEfficiency === Efficiency.Strong ? 1 : 0
+    result = result.filter(
+      (student) => compareBulletArmour(student.BulletType, armor) >= threshold
+    )
+  }
+
+  return result
 }
