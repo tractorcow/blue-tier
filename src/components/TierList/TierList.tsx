@@ -11,7 +11,7 @@ import {
   DropResult,
 } from '@hello-pangea/dnd'
 import type { SchaleDBData, Student } from '@/lib/shaledb/types'
-import { AllTiers, SquadTypes } from '@/lib/ranking/lists'
+import { AllTiers, SquadTypes, tierNames } from '@/lib/ranking/lists'
 import StudentList from '@/components/Students/StudentList'
 import StudentCard from '@/components/Students/StudentCard'
 import {
@@ -391,7 +391,7 @@ export default function TierList({
 
           {/* Tier Rows */}
           <div className='rounded-lg bg-gray-100 p-4 shadow-md dark:bg-gray-800'>
-            <div className='grid grid-cols-[0fr_1fr_1fr] gap-x-4 p-4'>
+            <div className='grid grid-cols-[0fr_1fr_1fr] gap-x-2'>
               {/*Header Row*/}
               <div className='p-2' />
               {SquadTypes.map((category) => (
@@ -407,9 +407,9 @@ export default function TierList({
               <DragDropContext onDragEnd={handleDragEnd}>
                 {AllTiers.map((tier) => (
                   <React.Fragment key={tier}>
-                    <div className='p-2 text-center font-semibold'>
+                    <div className='py-2 text-center font-semibold'>
                       <label className='box-content flex h-32 items-center justify-center text-xl'>
-                        {tier}
+                        {tierNames[tier]}
                       </label>
                     </div>
                     {SquadTypes.map((category) => (
@@ -420,7 +420,7 @@ export default function TierList({
                         {(provided, state) => (
                           <div
                             className={classnames(
-                              'box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 p-2',
+                              'box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 py-2',
                               state.isDraggingOver
                                 ? 'bg-gray-400 dark:bg-gray-700'
                                 : ''

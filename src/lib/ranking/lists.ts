@@ -18,6 +18,16 @@ export const AllTiers: AllTier[] = [
   UnrankedType.Unranked,
 ]
 
+export const tierNames: Record<AllTier, string> = {
+  [Tier.SS]: 'SS',
+  [Tier.S]: 'S',
+  [Tier.A]: 'A',
+  [Tier.B]: 'B',
+  [Tier.C]: 'C',
+  [Tier.D]: 'D',
+  [UnrankedType.Unranked]: 'Not Ranked',
+}
+
 export const armorNames: Record<AllArmorType, string> = {
   [AllType.All]: 'All Armors',
   [ArmorType.Normal]: 'Normal',
