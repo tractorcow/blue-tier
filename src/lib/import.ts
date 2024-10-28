@@ -63,9 +63,6 @@ const processData = async (
   // Lookup raids to make sure the given raid is valid
   const raid = raids.find((r) => r.Name === raidName)
   if (!raid) {
-    for (const r of raids) {
-      console.log(r.Name)
-    }
     throw new Error(`Invalid raid: ${raidName}`)
   }
 
