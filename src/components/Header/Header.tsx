@@ -1,8 +1,8 @@
-import ModeToggle from '@/components/TierList/ModeToggle'
-import { RankingType } from '@/lib/ranking/types'
-import AuthComponent from '@/components/Auth/AuthComponent'
 import React from 'react'
 import { useSession } from 'next-auth/react'
+import ModeToggle from '@/components/Header/ModeToggle'
+import { RankingType } from '@/lib/ranking/types'
+import AuthComponent from '@/components/Auth/AuthComponent'
 import HelpButton from '@/components/Help/HelpButton'
 
 type HeaderProps = {

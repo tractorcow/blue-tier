@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import classnames from 'classnames'
 import ClickOutside from '@/components/ClickOutside/ClickOutside'
+import { Optional } from '@/lib/types'
 
 type DropdownOption<T> = {
   value: T
@@ -11,8 +12,8 @@ type DropdownOption<T> = {
 
 type DropdownProps<T> = {
   options: DropdownOption<T>[]
-  value: T | null
-  onChange: (value: T | null) => void
+  value: Optional<T>
+  onChange: (value: Optional<T>) => void
   placeholder?: string
   noneLabel?: string
   canDeselect?: boolean
