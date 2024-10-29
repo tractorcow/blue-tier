@@ -1,3 +1,5 @@
+import { Optional } from '@/lib/types'
+
 export enum Efficiency {
   Strong = 'Strong',
   Neutral = 'Neutral',
@@ -15,8 +17,8 @@ export const armorEfficiencies = {
 
 export type SearchState = {
   searchQuery: string
-  bulletEfficiency: Efficiency | null
-  armorEfficiency: Efficiency | null
+  bulletEfficiency: Optional<Efficiency>
+  armorEfficiency: Optional<Efficiency>
 }
 
 // Define action types
@@ -35,12 +37,12 @@ interface SetSearchQueryAction {
 
 interface SetBulletEfficiencyAction {
   type: SearchActionTypes.SET_BULLET_EFFICIENCY
-  payload: Efficiency | null
+  payload: Optional<Efficiency>
 }
 
 interface SetArmorEfficiencyAction {
   type: SearchActionTypes.SET_ARMOR_EFFICIENCY
-  payload: Efficiency | null
+  payload: Optional<Efficiency>
 }
 
 interface ResetSearchStateAction {

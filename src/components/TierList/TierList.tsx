@@ -2,18 +2,7 @@
 
 import React, { useEffect, useReducer, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import {
-  DragDropContext,
-  Draggable,
-  DraggableStateSnapshot,
-  DraggableStyle,
-  Droppable,
-  DropResult,
-} from '@hello-pangea/dnd'
-import type { SchaleDBData, Student } from '@/lib/shaledb/types'
-import { AllTiers, SquadTypes, tierNames } from '@/lib/ranking/lists'
-import StudentList from '@/components/Students/StudentList'
-import StudentCard from '@/components/Students/StudentCard'
+import type { SchaleDBData } from '@/lib/shaledb/types'
 import {
   FilterActionTypes,
   filterReducer,
@@ -34,43 +23,24 @@ import {
 } from '@/lib/ranking'
 import useAsyncQueue from '@/state/AsyncQueue'
 import { fetchRankings, saveRankings } from '@/lib/user'
-import TierFilters from '@/components/TierList/TierFilters'
-import LoadingOverlay from '@/components/TierList/Loading'
-import classnames from 'classnames'
+import TierFilters from '@/components/Filter/TierFilters'
+import LoadingOverlay from '@/components/Loading/Loading'
 import {
-  armorEfficiencies,
-  bulletEFficiencies,
   Efficiency,
   initialSearchState,
   SearchActionTypes,
   searchReducer,
 } from '@/state/SearchState'
-import { Dropdown } from '@/components/Fields/Dropdown'
 import Header from '@/components/Header/Header'
 import Footer from '@/components/Footer/Footer'
+import TierSearch from '@/components/Search/TierSearch'
+import { Optional } from '@/lib/types'
+import TierGrid from '@/components/TierList/TierGrid'
 
 type TierListProps = {
   schaleData: SchaleDBData
   globalRankings: Ranking[]
   namedRankings?: string
-}
-
-const getStyle = (
-  style: DraggableStyle | undefined,
-  snapshot: DraggableStateSnapshot
-) => {
-  if (!snapshot.isDragging) {
-    return {}
-  }
-  if (!snapshot.isDropAnimating) {
-    return style
-  }
-
-  return {
-    ...style,
-    // cannot be 0, but make it super tiny
-    transitionDuration: `0.001s`,
-  }
 }
 
 export default function TierList({
@@ -196,14 +166,14 @@ export default function TierList({
     dispatchSearch({ type: SearchActionTypes.SET_SEARCH_QUERY, payload: name })
   }
 
-  const setBulletEfficiency = (efficiency: Efficiency | null) => {
+  const setBulletEfficiency = (efficiency: Optional<Efficiency>) => {
     dispatchSearch({
       type: SearchActionTypes.SET_BULLET_EFFICIENCY,
       payload: efficiency,
     })
   }
 
-  const setArmorEfficiency = (efficiency: Efficiency | null) => {
+  const setArmorEfficiency = (efficiency: Optional<Efficiency>) => {
     dispatchSearch({
       type: SearchActionTypes.SET_ARMOR_EFFICIENCY,
       payload: efficiency,
@@ -260,15 +230,7 @@ export default function TierList({
     })
   }
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination) {
-      return
-    }
-
-    // Get the tier from the droppableId, e.g. "SS-Main" -> "SS"
-    const tier = result.destination.droppableId.split('-')?.[0] as AllTier
-    const studentId = parseInt(result.draggableId)
-
+  const handleStudentRanked = (studentId: number, tier: AllTier) => {
     // Validate we have all the details for this ranking
     if (
       !tier ||
@@ -319,14 +281,14 @@ export default function TierList({
     'Global Rankings'
 
   return (
-    <div className='container mx-auto'>
+    <div className='container mx-auto space-y-4'>
       <Header
         rankingType={rankingType}
         setRankingType={setRankingType}
         subtitle={subtitle}
       />
 
-      <div className='space-y-4 bg-gray-400 px-4 py-6 dark:bg-gray-900'>
+      <div className='space-y-4 rounded-md bg-gray-400 p-4 dark:bg-gray-900'>
         <TierFilters
           raids={raids}
           selectedRaid={selectedRaid}
@@ -339,138 +301,25 @@ export default function TierList({
           changeArmour={changeArmour}
         />
 
-        {/* Main Area */}
-        <div className='flex flex-col space-y-4'>
-          {/* Global Rankings Toggle */}
-          <div className='flex flex-col justify-between space-y-2 md:flex-row md:space-x-2 md:space-y-0'>
-            <div className='relative flex-grow text-right'>
-              <input
-                type='text'
-                value={searchState.searchQuery}
-                onChange={(e) => setNameFilter(e.target.value)}
-                placeholder='Filter students by name'
-                className='w-full rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 pl-10 placeholder-gray-700 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-white dark:bg-gray-700 dark:placeholder-gray-400'
-              />
-              <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
-                <i className='fas fa-search text-gray-500 dark:text-gray-400'></i>
-              </div>
-            </div>
-            <div className='flex-grow'>
-              <Dropdown
-                options={Object.keys(bulletEFficiencies).map((key) => ({
-                  value: key as Efficiency,
-                  label: bulletEFficiencies[key as Efficiency],
-                }))}
-                value={searchState.bulletEfficiency}
-                onChange={setBulletEfficiency}
-                canDeselect={true}
-                placeholder='Filter bullet effectiveness'
-                noneLabel='Any bullet'
-                className='rounded-lg border-[1px] border-black bg-gray-600 px-4 py-2 dark:border-white'
-                menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
-              />
-            </div>
-            <div className='flex-grow'>
-              <Dropdown
-                options={Object.keys(armorEfficiencies).map((key) => ({
-                  value: key as Efficiency,
-                  label: armorEfficiencies[key as Efficiency],
-                }))}
-                value={searchState.armorEfficiency}
-                onChange={setArmorEfficiency}
-                canDeselect={true}
-                placeholder='Filter armor resistance'
-                noneLabel='Any armor'
-                className='rounded-lg border-[1px] border-black bg-gray-600 px-4 py-2 dark:border-white'
-                menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
-              />
-            </div>
-          </div>
-
-          {loading && <LoadingOverlay />}
-
-          {/* Tier Rows */}
-          <div className='rounded-lg bg-gray-100 p-4 shadow-md dark:bg-gray-800'>
-            <div className='grid grid-cols-[0fr_1fr_1fr] gap-x-2'>
-              {/*Header Row*/}
-              <div className='p-2' />
-              {SquadTypes.map((category) => (
-                <div
-                  key={category.title}
-                  className='p-2 text-center text-lg font-bold'
-                >
-                  {category.title}
-                </div>
-              ))}
-
-              {/* Repeated Rows for SS, S, A, B, C, D, and Unranked (non-droppable) */}
-              <DragDropContext onDragEnd={handleDragEnd}>
-                {AllTiers.map((tier) => (
-                  <React.Fragment key={tier}>
-                    <div className='py-2 text-center font-semibold'>
-                      <label className='box-content flex h-32 items-center justify-center text-xl'>
-                        {tierNames[tier]}
-                      </label>
-                    </div>
-                    {SquadTypes.map((category) => (
-                      <Droppable
-                        key={category.squadType}
-                        droppableId={`${tier}-${category.squadType}`}
-                      >
-                        {(provided, state) => (
-                          <div
-                            className={classnames(
-                              'box-content flex min-h-32 flex-wrap content-start items-start justify-start gap-2 border-t-[1px] border-gray-500 py-2',
-                              state.isDraggingOver
-                                ? 'bg-gray-400 dark:bg-gray-700'
-                                : ''
-                            )}
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                          >
-                            <StudentList
-                              students={rankings[tier]}
-                              tier={tier}
-                              squadType={category.squadType}
-                            >
-                              {(student: Student, index: number) => (
-                                <Draggable
-                                  key={student.Id}
-                                  draggableId={student.Id.toString()}
-                                  index={index}
-                                  isDragDisabled={
-                                    rankingType === RankingType.Global
-                                  }
-                                >
-                                  {(provided, snapshot) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                      style={getStyle(
-                                        provided.draggableProps.style,
-                                        snapshot
-                                      )}
-                                    >
-                                      <StudentCard student={student} />
-                                    </div>
-                                  )}
-                                </Draggable>
-                              )}
-                            </StudentList>
-                            {provided.placeholder}
-                          </div>
-                        )}
-                      </Droppable>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </DragDropContext>
-            </div>
-          </div>
-        </div>
+        {/* Global Rankings Toggle */}
+        <TierSearch
+          searchState={searchState}
+          setNameFilter={setNameFilter}
+          setArmorEfficiency={setArmorEfficiency}
+          setBulletEfficiency={setBulletEfficiency}
+        />
       </div>
+
+      {/*<GridComponent />*/}
+
+      {/*Tier Rows */}
+      <TierGrid
+        rankings={rankings}
+        rankingType={rankingType}
+        onStudentRanked={handleStudentRanked}
+      />
       <Footer />
+      {loading && <LoadingOverlay />}
     </div>
   )
 }
