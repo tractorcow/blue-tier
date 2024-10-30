@@ -281,7 +281,7 @@ export default function TierList({
     'Global Rankings'
 
   return (
-    <div className='container mx-auto space-y-4'>
+    <div className='container mx-auto space-y-4 p-2'>
       <Header
         rankingType={rankingType}
         setRankingType={setRankingType}
@@ -301,7 +301,6 @@ export default function TierList({
           changeArmour={changeArmour}
         />
 
-        {/* Global Rankings Toggle */}
         <TierSearch
           searchState={searchState}
           setNameFilter={setNameFilter}
@@ -310,9 +309,6 @@ export default function TierList({
         />
       </div>
 
-      {/*<GridComponent />*/}
-
-      {/*Tier Rows */}
       <TierGrid
         rankings={rankings}
         rankingType={rankingType}

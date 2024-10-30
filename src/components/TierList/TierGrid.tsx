@@ -46,23 +46,23 @@ export default function TierGrid({
         {AllTiers.map((tier) => (
           <div
             key={tier}
-            className='grid grid-cols-[1fr_auto_1fr] items-start gap-4 rounded-md bg-gray-300 p-4 dark:bg-gray-800'
+            className='grid grid-cols-[1fr_1fr] items-start gap-x-2 gap-y-4 rounded-md bg-gray-300 p-4 md:grid-cols-[1fr_auto_1fr] md:grid-rows-1 md:gap-x-4 dark:bg-gray-800'
           >
+            {/* Center Column - Ranking */}
+            <div className='order-1 col-span-2 w-full text-center text-xl font-bold text-gray-800 md:order-2 md:col-span-1 md:w-16 dark:text-gray-200'>
+              <label className='box-content flex items-center justify-center text-xl md:h-32'>
+                {tierNames[tier]}
+              </label>
+            </div>
+
             {/* Left Column */}
             <TierGroup
               students={rankings[tier]}
               tier={tier}
               squadType={SquadType.Main}
               rankingType={rankingType}
-              className='justify-start'
+              className='order-2 w-full justify-start md:order-1 md:w-auto'
             />
-
-            {/* Center Column - Ranking */}
-            <div className='w-16 text-center text-xl font-bold text-gray-800 dark:text-gray-200'>
-              <label className='box-content flex h-32 items-center justify-center text-xl'>
-                {tierNames[tier]}
-              </label>
-            </div>
 
             {/* Right Column */}
             <TierGroup
@@ -70,7 +70,7 @@ export default function TierGrid({
               tier={tier}
               squadType={SquadType.Support}
               rankingType={rankingType}
-              className='justify-end'
+              className='order-3 w-full justify-end md:w-auto'
             />
           </div>
         ))}
