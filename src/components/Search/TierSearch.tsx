@@ -44,7 +44,7 @@ export default function TierSearch({
           value={searchState.bulletEfficiency}
           onChange={setBulletEfficiency}
           canDeselect={true}
-          placeholder='Filter bullet effectiveness'
+          placeholder='Filter bullet effect'
           noneLabel='Any bullet'
           className='rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 dark:border-white dark:bg-gray-700'
           menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
@@ -59,7 +59,7 @@ export default function TierSearch({
           value={searchState.armorEfficiency}
           onChange={setArmorEfficiency}
           canDeselect={true}
-          placeholder='Filter armor resistance'
+          placeholder='Filter armor resist'
           noneLabel='Any armor'
           className='rounded-lg border-[1px] border-black bg-gray-300 px-4 py-2 dark:border-white dark:bg-gray-700'
           menuClassName='rounded-md border border-gray-300 bg-white shadow-lg dark:border-gray-600 dark:bg-gray-800 text-lg'
